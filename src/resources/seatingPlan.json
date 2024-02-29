@@ -1,0 +1,4 @@
+[
+  { "id": 1, "number": "A1", "isReserverd": true},
+  { "id": 2, "number": "A2", "isReserverd": false }
+]
