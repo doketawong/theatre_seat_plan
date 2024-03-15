@@ -1,10 +1,10 @@
-import { Route } from 'react-router-dom';
+import SeatingPlan from './component/pages/SeatingPlan';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <Route/>
+      <SeatingPlan/>
     </div>
   );
 }
