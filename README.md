@@ -39,3 +39,21 @@ Theatre Seating plan
 - SeatingPlan
     seating plan json
 
+
+
+
+Database:
+create table private_cinema
+(
+    private_cinema serial
+        constraint private_cinema_pk
+            primary key,
+    seating_plan   bytea
+);
+
+Database config:
+  host: 'localhost',
+  port: 5432,
+  database: 'moviematic',
+  user: 'postgres',
+  password: 'postgres'
