@@ -24,6 +24,20 @@ app.get("/api/hello", async (req, res) => {
   }
 });
 
+app.get("/uploadSeatingPlan", async (req, res) => {
+  try {
+    const client = await pool.connect();
+    for (let row of req.body) {
+      const result = await client.query('INSERT INTO private_cinema () VALUES ($1)', [row.data]);
+    }
+    res.json({ message: 'Data stored successfully' });
+    client.release();
+  } catch (err) {
+    console.error(err);
+    res.send("Error " + err);
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
