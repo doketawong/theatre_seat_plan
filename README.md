@@ -51,6 +51,20 @@ create table private_cinema
     seating_plan   bytea
 );
 
+CREATE TABLE attendance
+(
+    id SERIAL
+        CONSTRAINT attendance_pk
+            PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    mobile_number VARCHAR(15) NOT NULL,
+    seatNo INT NOT NULL
+    private_cinema serial
+);
+
+
+
+
 Database config:
   host: 'localhost',
   port: 5432,

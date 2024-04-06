@@ -38,6 +38,28 @@ app.get("/uploadSeatingPlan", async (req, res) => {
   }
 });
 
+//add importAttendance
+app.get("/importAttendance", async (req, res) => {
+  //join attendance and private_cinema
+  try {
+    const client = await pool.connect();
+    for (let row of req.body) {
+      const result = await client.query('INSERT INTO attendance () VALUES ($1)', [row.data]);
+    }
+    res.json({ message: 'Data stored successfully' });
+    client.release();
+  } catch (err) {
+    console.error(err);
+    res.send("Error " + err);
+  }
+});
+
+
+
+
+
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
