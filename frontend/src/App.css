@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+.guestList {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 200px;
+  height: 100%;
+
+  .guestItem {
+    color: black;
+  }
+
+  .highlight{
+    color: red !important;
+  }
+}

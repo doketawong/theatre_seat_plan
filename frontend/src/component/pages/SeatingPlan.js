@@ -1,29 +1,71 @@
-import { Box, Button, Typography } from '@mui/material';
-import React from 'react';
+import { Box, Button, Typography, TextField} from "@mui/material";
+import React, { useState, forwardRef } from "react";
+import { formSubmit } from '../util/utils';
 
-const SeatingPlan = () => {
-  // Define the seating plan
-  const seatingPlan = [
-    [{seat:'A1', marked: true, reserved: true}, 'A2', 'A3', 'A4', 'A5'],
-    ['6', '7', '8', '9', '10'],
-    ['11', '12', '13', '14', '15'],
-    ['16', '17', '18', '19', '20'],
-  ];
+const SeatingPlan = (props) => {
+  const [form, setForm] = useState({
+    eventName: '',
+    eventDate: '',
+    houseId: '',
+    file: null
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prevState => ({ ...prevState, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    setForm(prevState => ({ ...prevState, file: e.target.files[0] }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    Object.keys(form).forEach(key => formData.append(key, form[key]));
+
+    formSubmit(`/uploadEvent`, {
+      method: 'POST',
+      body: formData
+    })
+  };
 
   return (
     <Box>
-      <Typography>Seating Plan</Typography>
-      {seatingPlan.map((row, i) => (
-        <div key={i}>
-          {row.map((seat, j) => (
-            <Button key={j} style={{margin: '5px'}}>
-              {seat}
-            </Button>
-          ))}
-        </div>
-      ))}
+      <div>
+        <Typography><b>{props.eventName}</b> Seating Plan</Typography>
+        <table>
+          <thead></thead>
+          <tbody>
+            {props.seat ? Object.keys(props.seat).map((key, i) => (
+              <tr key={key}>
+                <td>{key}</td>
+                {props.seat[key].map((obj, j) => (
+                  <td key={key + j}>
+                    <Button key={key + j} style={{ margin: "1px" }}>
+                      {obj ? obj.displayName : null}
+                    </Button>
+                  </td>
+                ))}
+              </tr>
+            )) : <tr><td>Loading...</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <hr/>
+      <div>
+        <div>Submit Event with guest data:</div>
+        <form onSubmit={handleSubmit}>
+          <TextField name="eventName" label="Dune: Part Two" value={form.eventName} onChange={handleChange} />
+          <TextField name="eventDate" label="Event Date" type="datetime-local" InputLabelProps={{ shrink: true }} value={form.eventDate} onChange={handleChange} />
+          <TextField name="houseId" label="1" value={form.houseId} onChange={handleChange} />
+          <input type="file" onChange={handleFileChange} />
+          <Button type="submit">Submit</Button>
+        </form>
+      </div>
     </Box>
   );
 };
 
-export default SeatingPlan;
+export default forwardRef(SeatingPlan);
