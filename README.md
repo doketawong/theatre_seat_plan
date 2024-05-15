@@ -43,42 +43,39 @@ Theatre Seating plan
 
 
 Database:
-CREATE TABLE IF NOT EXISTS public.cinema
-(
-    cinema_id integer NOT NULL DEFAULT nextval('cinema_cinema_id_seq'::regclass),
-    display_name character varying COLLATE pg_catalog."default",
-    location character varying COLLATE pg_catalog."default",
-    CONSTRAINT cinema_pkey PRIMARY KEY (cinema_id)
-)
+CREATE TABLE public.cinema (
+	cinema_id serial4 NOT NULL,
+	display_name varchar NULL,
+	"location" varchar NULL,
+	CONSTRAINT cinema_pkey PRIMARY KEY (cinema_id)
+);
 INSERT INTO public.cinema(
 	cinema_id, display_name, location)
 	VALUES (DEFAULT, '嘉禾the sky 奧海城', '西九龍 海庭道18號 奧海城2期 1樓'),
 	(DEFAULT, '百老匯 PREMIERE ELEMENTS', '尖沙咀 柯士甸道西1號 圓方商場 2樓火區');
 
 
-CREATE TABLE IF NOT EXISTS public.house
-(
-    house_id integer NOT NULL DEFAULT nextval('cinema_house_house_id_seq'::regclass),
-    cinema_id integer NOT NULL DEFAULT nextval('cinema_house_cinema_id_seq'::regclass),
-    display_name character varying COLLATE pg_catalog."default" NOT NULL,
-    seat character varying COLLATE pg_catalog."default",
-    CONSTRAINT cinema_house_pkey PRIMARY KEY (house_id)
-)
+CREATE TABLE public.house (
+	house_id serial4 NOT NULL,
+	cinema_id serial4 NOT NULL,
+	display_name varchar NOT NULL,
+	seat varchar NULL,
+	CONSTRAINT cinema_house_pkey PRIMARY KEY (house_id)
+);
 INSERT INTO public.house(
 	house_id, cinema_id, display_name, seat)
 	VALUES (DEFAULT, 1, 'HOUSE 2', '{"A":[null,null,null,null,null,null,null,null,null,null,null,12,13,14,15,16,17],"B":[null,null,null,4,5,6,null,null,null,null,null,12,13,14,15,16,17],"C":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"D":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"E":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"F":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"G":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"H":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"I":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"J":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"K":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"L":[1,2,3,4,5,6,null,null,9,10,11,12,13,14,15,16,17],"M":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]}');
 
 
-CREATE TABLE IF NOT EXISTS public.event
-(
-    event_id integer NOT NULL DEFAULT nextval('event_event_id_seq'::regclass),
-    event_name character varying COLLATE pg_catalog."default",
-    event_date timestamp without time zone,
-    house_id integer NOT NULL DEFAULT nextval('event_house_id_seq'::regclass),
-    guest_data character varying COLLATE pg_catalog."default",
-    seating_plan character varying COLLATE pg_catalog."default",
-    CONSTRAINT event_pkey PRIMARY KEY (event_id)
-)
+CREATE TABLE public."event" (
+	event_id serial4 NOT NULL,
+	event_name varchar NULL,
+	event_date timestamp NULL,
+	house_id serial4 NOT NULL,
+	guest_data varchar NULL,
+	seating_plan varchar NULL,
+	CONSTRAINT event_pkey PRIMARY KEY (event_id)
+);
 // form submit with guest.csv
 
 
