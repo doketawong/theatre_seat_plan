@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { createDefaultSeat } from "./component/type/seat.ts";
 
 import "./App.css";
+import { Typography, Button, Checkbox, TextField, Grid } from "@mui/material";
 
 function App() {
   const [eventId, setEventId] = useState("");
@@ -40,7 +41,8 @@ function App() {
 
   const handleCheck = (index) => {
     const newGuestData = [...guestData];
-    newGuestData[index].checked = newGuestData[index].checked === "true" ? "false" : "true";
+    newGuestData[index].checked =
+      newGuestData[index].checked === "true" ? "false" : "true";
     setGuestData(newGuestData);
   };
 
@@ -57,46 +59,71 @@ function App() {
     );
   };
 
+  const handleAssign = () => {
+    const checkedGuests = guestData.filter((guest) => guest.checked === "true");
+    let participants = checkedGuests.map((guest) => guest.tel);
+    let seatingPlan = setDefaultSeatingPlan(seat);
+    console.log(seatingPlan);
+    console.log(participants);
+    updateEventSeatingPlan(eventId, seatingPlan);
+  }
+
   return (
     <div className="App">
-      <div>
-        <form onSubmit={getEventData}>
-          <input
-            type="text"
-            value={eventId}
-            onChange={(e) => setEventId(e.target.value)}
-            placeholder="Enter event ID"
-          />
-          <button type="submit">Submit</button>
-        </form>
-      </div>
-      <SeatingPlan seat={seat} eventName={eventName} eventId={eventId} />
-      <div className="guestList">
-        Guest List:{" "}
-        <input
-          value={searchValue}
-          placeholder="search"
-          onChange={(e) => setSearchValue(e.target.value)}
-        />
-        {guestData &&
-          guestData.length > 0 &&
-          guestData.map((guest, index) => (
-            <div
-              key={index}
-              className={`guestItem ${
-                searchGuestList(guest.ig, guest.tel) ? "highlight" : ""
-              }`}
+      <Grid container spacing={2} justifyContent="center">
+        <Grid item xs={6}>
+          <form onSubmit={getEventData}>
+            <TextField
+              type="text"
+              value={eventId}
+              onChange={(e) => setEventId(e.target.value)}
+              variant="outlined"
+              placeholder="Enter event ID"
+              margin="normal"
+              fullWidth
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              style={{ marginTop: "16px" }}
             >
-              <input
-                type="checkbox"
-                checked={guest.checked === "true"}
-                onChange={() => handleCheck(index)}
-              />
-              {guest.tel} / {guest.guest_num}
-            </div>
-          ))}
-        <button onClick={handleButtonClick}>sit down</button>
-      </div>
+              Submit
+            </Button>
+          </form>
+        </Grid>
+        <Grid item xs={12}>
+          <SeatingPlan seat={seat} eventName={eventName} eventId={eventId} />
+        </Grid>
+        <Grid item xs={12} sm={6} justifyContent="center">
+          <Typography variant="h6">Guest List:</Typography>
+          <TextField
+            value={searchValue}
+            placeholder="search"
+            onChange={(e) => setSearchValue(e.target.value)}
+            margin="normal"
+            variant="outlined"
+            fullWidth
+          />
+          {guestData &&
+            guestData.length > 0 &&
+            guestData.map((guest, index) => (
+              <Grid container key={index} alignItems="center">
+                <Grid item xs={1}>
+                  <Checkbox
+                    checked={guest.checked === "true"}
+                    onChange={() => handleCheck(index)}
+                  />
+                </Grid>
+                <Grid item xs={11}>
+                  <Typography>
+                    {guest.tel} / {guest.guest_num}
+                  </Typography>
+                </Grid>
+              </Grid>
+            ))}
+            <Button variant="contained" onClick={handleAssign}>Assign seat</Button>
+        </Grid>
+      </Grid>
     </div>
   );
 }
@@ -111,13 +138,13 @@ function AppWithRouter() {
 
 function updateEventSeatingPlan(eventId, seatingPlan) {
   formSubmit(`/updateEventSeatingPlan/${eventId}`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ seatingPlan: seatingPlan }),
   }).then((data) => {
-    console.log('update success')
+    console.log("update success");
   });
 }
 
