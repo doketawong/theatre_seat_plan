@@ -178,7 +178,7 @@ app.get("/getSeatByEventId/:eventId", cors(), async (req, res) => {
 app.post("/updateEventSeatingPlan/:eventId", cors(), async (req, res) => {
   try {
     const { eventId } = req.params;
-    const { seatingPlan } = req.body;
+    const seatingPlan  = JSON.stringify(req.body);
     const client = await pool.connect();
     const result = await client.query(
       "UPDATE event SET seating_plan = $1 WHERE event_id = $2",

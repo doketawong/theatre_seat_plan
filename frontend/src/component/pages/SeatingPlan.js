@@ -1,5 +1,5 @@
 import { Box, Button, Typography, TextField, Grid } from "@mui/material";
-import React, { useState, forwardRef, useEffect } from "react";
+import React, { useState, forwardRef } from "react";
 import { formSubmit } from "../util/utils";
 
 const SeatingPlan = (props) => {
@@ -51,14 +51,10 @@ const SeatingPlan = (props) => {
                     borderColor="grey.500"
                     style={{ opacity: col.disabled ? 0.5 : 1 }}
                   >
-                    <Typography
-                      variant="body1"
-                      style={{
-                        textDecoration: col.marked ? "underline" : "none",
-                      }}
-                    >
+                    <Typography variant="body1">
                       {col.display || col.column}
                     </Typography>
+                    <Typography variant="body1">{col.display}</Typography>
                   </Box>
                 ))}
               </Box>
@@ -112,7 +108,9 @@ const SeatingPlan = (props) => {
                 <input type="file" onChange={handleFileChange} />
               </Grid>
               <Grid item xs={12}>
-                <Button type="submit" variant="contained">Submit</Button>
+                <Button type="submit" variant="contained">
+                  Submit
+                </Button>
               </Grid>
             </Grid>
           </form>

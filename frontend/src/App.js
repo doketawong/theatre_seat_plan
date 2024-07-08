@@ -2,14 +2,20 @@ import SeatingPlan from "./component/pages/SeatingPlan";
 import { BrowserRouter as Router } from "react-router-dom";
 import { formSubmit, fetchData } from "./component/util/utils";
 import React, { useState } from "react";
-import { createDefaultSeat } from "./component/type/seat.ts";
 
 import "./App.css";
-import { Typography, Button, Checkbox, TextField, Grid } from "@mui/material";
+import {
+  Typography,
+  Button,
+  Autocomplete,
+  TextField,
+  Grid,
+} from "@mui/material";
 
 function App() {
   const [eventId, setEventId] = useState("");
-  const [guestData, setGuestData] = useState("");
+  const [guestData, setGuestData] = useState([]);
+  const [selectedValues, setSelectedValues] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [seat, setSeat] = useState(null);
   const [eventName, setEventName] = useState(null);
@@ -28,12 +34,10 @@ function App() {
       if (result) {
         setEventName(result.event_name);
         if (result.seating_plan == null) {
-          seatingPlan = setDefaultSeatingPlan(JSON.parse(data.results[0].seat));
           updateEventSeatingPlan(eventId, seatingPlan);
         } else {
           seatingPlan = JSON.parse(result.seating_plan);
         }
-        console.log(seatingPlan);
         setSeat(seatingPlan);
       }
     });
@@ -48,7 +52,6 @@ function App() {
 
   const handleButtonClick = () => {
     const checkedGuests = guestData.filter((guest) => guest.checked === "true");
-    console.log(checkedGuests);
   };
 
   const searchGuestList = (ig, tel) => {
@@ -60,13 +63,55 @@ function App() {
   };
 
   const handleAssign = () => {
-    const checkedGuests = guestData.filter((guest) => guest.checked === "true");
-    let participants = checkedGuests.map((guest) => guest.tel);
-    let seatingPlan = setDefaultSeatingPlan(seat);
-    console.log(seatingPlan);
-    console.log(participants);
+    const totalGuestNum = selectedValues.reduce(
+      (acc, guest) => acc + parseInt(guest.guest_num, 10),
+      0
+    );
+    let seatingPlan = assignSeats(seat, selectedValues, totalGuestNum, 0, 0);
+
     updateEventSeatingPlan(eventId, seatingPlan);
-  }
+  };
+
+  const assignSeats = (
+    seatingPlan,
+    selectedValues,
+    participants,
+    row = 0,
+    col = 0
+  ) => {
+    // Base case: if there are no more participants, return the seating plan
+    if (participants === 0) {
+      return seatingPlan;
+    }
+
+    // If we've run out of seats, throw an error
+    if (row >= seatingPlan.length || col >= seatingPlan[0].length) {
+      throw new Error("Not enough seats for all participants");
+    }
+
+    // Assign the first participant to the current seat
+    if(seatingPlan[row].column[col].marked || seatingPlan[row].column[col].reserved || seatingPlan[row].column[col].disabled) {
+      return assignSeats(seatingPlan, selectedValues, participants, row, col + 1);
+    }
+    seatingPlan[row].column[col].marked = true;
+    seatingPlan[row].column[col].display = selectedValues.ig;
+    console.log(seatingPlan[row].column[col]);
+
+    // Move to the next seat
+    let nextRow = row;
+    let nextCol = col + 1;
+    if (nextCol >= seatingPlan[0].length) {
+      nextRow++;
+      nextCol = 0;
+    }
+
+    // Recursively assign the rest of the participants
+    return assignSeats(seatingPlan, selectedValues, --participants, nextRow, nextCol);
+  };
+
+  const handleSelectionChange = (event, newValue) => {
+    setSelectedValues(newValue);
+  };
 
   return (
     <div className="App">
@@ -96,32 +141,19 @@ function App() {
         </Grid>
         <Grid item xs={12} sm={6} justifyContent="center">
           <Typography variant="h6">Guest List:</Typography>
-          <TextField
-            value={searchValue}
-            placeholder="search"
-            onChange={(e) => setSearchValue(e.target.value)}
-            margin="normal"
-            variant="outlined"
-            fullWidth
+          <Autocomplete
+            multiple
+            value={selectedValues}
+            onChange={handleSelectionChange}
+            options={guestData}
+            getOptionLabel={(option) => option.tel} // Adjust according to your data structure
+            renderInput={(params) => (
+              <TextField {...params} label="Choose a guest" />
+            )}
           />
-          {guestData &&
-            guestData.length > 0 &&
-            guestData.map((guest, index) => (
-              <Grid container key={index} alignItems="center">
-                <Grid item xs={1}>
-                  <Checkbox
-                    checked={guest.checked === "true"}
-                    onChange={() => handleCheck(index)}
-                  />
-                </Grid>
-                <Grid item xs={11}>
-                  <Typography>
-                    {guest.tel} / {guest.guest_num}
-                  </Typography>
-                </Grid>
-              </Grid>
-            ))}
-            <Button variant="contained" onClick={handleAssign}>Assign seat</Button>
+          <Button variant="contained" onClick={handleAssign}>
+            Assign seat
+          </Button>
         </Grid>
       </Grid>
     </div>
@@ -142,21 +174,10 @@ function updateEventSeatingPlan(eventId, seatingPlan) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ seatingPlan: seatingPlan }),
+    body: JSON.stringify(seatingPlan),
   }).then((data) => {
     console.log("update success");
   });
-}
-
-function setDefaultSeatingPlan(seat) {
-  let seatingPlan = { ...seat };
-  Object.entries(seatingPlan).forEach(([key, row]) => {
-    row.forEach((seat, index) => {
-      seatingPlan[key][index] =
-        seat == null ? null : createDefaultSeat(key + seat);
-    });
-  });
-  return seatingPlan;
 }
 
 export default AppWithRouter;
