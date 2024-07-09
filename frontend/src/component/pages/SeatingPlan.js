@@ -35,29 +35,50 @@ const SeatingPlan = (props) => {
     <Box>
       <div>
         <Typography>
-          <b>{props.eventName}</b> Seating Plan
+          <b>{props.eventName}</b>
         </Typography>
 
         {props.seat ? (
           props.seat.map((row, rowIndex) => (
             <Box key={rowIndex} mb={2}>
-              <Typography variant="h6">Row: {row.row}</Typography>
-              <Box display="flex" flexDirection="row" justifyContent="center">
-                {row.column.map((col) => (
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={2}>
+                  <Typography variant="h6">Row: {row.row}</Typography>
+                </Grid>
+                <Grid item xs={10}>
                   <Box
-                    key={col.id}
-                    p={1}
-                    border={1}
-                    borderColor="grey.500"
-                    style={{ opacity: col.disabled ? 0.5 : 1 }}
+                    display="flex"
+                    flexDirection="row"
+                    justifyContent="center"
                   >
-                    <Typography variant="body1">
-                      {col.display || col.column}
-                    </Typography>
-                    <Typography variant="body1">{col.display}</Typography>
+                    {row.column.map((col) => (
+                      <Box
+                        key={col.id}
+                        p={1}
+                        border={1}
+                        borderColor="grey.500"
+                        style={{
+                          opacity: col.disabled ? 0.5 : 1,
+                          marginRight: 8,
+                          width: "100px", // Fixed width
+                          height: "100px", // Fixed height
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          flexDirection: "column",
+                        }} // Added marginRight for space between boxes
+                      >
+                        <div>
+                          <Typography variant="body1">{col.column}</Typography>
+                        </div>
+                        <div>
+                          <Typography variant="body1">{col.display}</Typography>
+                        </div>
+                      </Box>
+                    ))}
                   </Box>
-                ))}
-              </Box>
+                </Grid>
+              </Grid>
             </Box>
           ))
         ) : (
