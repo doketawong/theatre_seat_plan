@@ -100,10 +100,13 @@ function App() {
 
     const updatedGuestData = guestData.map((guest) => {
       const isSelected = selectedValues.some(
-        (selected) => selected.id === guest.id
+        (selected) => selected.ig === guest.ig
       );
+      console.log(isSelected);
+      console.log(selectedValues);
       return isSelected ? { ...guest, checked: true } : guest;
     });
+    console.log(guestData);
 
     setSelectedValues([]);
     setGuestData(updatedGuestData);
@@ -190,14 +193,26 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div
+      className="App"
+      style={{
+        backgroundColor: "#000000",
+        color: "#fffff",
+        backgroundImage: "url('Twisters.jpeg')", // Update this path
+        backgroundSize: "cover", // Cover the entire page
+        backgroundPosition: "center", // Center the background image
+        backgroundRepeat: "no-repeat", // Do not repeat the image
+      }}
+    >
       <Grid container justifyContent="center">
         <Grid container alignItems="center">
           <Grid item xs={12} sm={6}>
             <form onSubmit={getEventData}>
               <Grid container alignItems="center">
                 <Grid item xs={12} sm={2}>
-                  <Typography variant="h6">Event Id:</Typography>
+                  <Typography variant="h6" style={{ color: "white" }}>
+                    Event Id:
+                  </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -208,6 +223,11 @@ function App() {
                     placeholder="Enter event ID"
                     margin="normal"
                     fullWidth
+                    InputProps={{
+                      style: {
+                        backgroundColor: "white", // Background color changed to white
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
@@ -232,7 +252,9 @@ function App() {
             spacing={2}
           >
             <Grid item>
-              <Typography variant="h6">Guest List:</Typography>
+              <Typography variant="h6" style={{ color: "white" }}>
+                Guest List:
+              </Typography>
             </Grid>
             <Grid item xs>
               <Autocomplete
@@ -243,7 +265,16 @@ function App() {
                 fullWidth
                 getOptionLabel={(option) => option.tel} // Adjust according to your data structure
                 renderInput={(params) => (
-                  <TextField {...params} label="Choose a guest" fullWidth />
+                  <TextField
+                    {...params}
+                    label="Choose a guest"
+                    fullWidth
+                    InputProps={{
+                      style: {
+                        backgroundColor: "white", // Background color changed to white
+                      },
+                    }}
+                  />
                 )}
               />
             </Grid>
@@ -267,7 +298,7 @@ function App() {
             spacing={2}
           >
             <Grid item>
-              <Typography variant="h6">
+              <Typography variant="h6" style={{ color: "white" }}>
                 Number of seat remain:{seatNo}
               </Typography>
             </Grid>
@@ -282,7 +313,7 @@ function App() {
             spacing={2}
           >
             <Grid item>
-              <Typography variant="h6">
+              <Typography variant="h6" style={{ color: "white" }}>
                 Number of guest remain:{guestNo}
               </Typography>
             </Grid>

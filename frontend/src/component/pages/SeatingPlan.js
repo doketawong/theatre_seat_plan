@@ -40,7 +40,7 @@ const SeatingPlan = (props) => {
   return (
     <Box>
       <div>
-        <Typography>
+        <Typography variant="h3" style={{ color: "white" }}>
           <b>{props.eventName}</b>
         </Typography>
 
@@ -48,35 +48,62 @@ const SeatingPlan = (props) => {
           props.seat.map((row, rowIndex) => (
             <Box key={rowIndex} mb={2}>
               <Grid container xs={12} alignItems="center">
-                <Grid item xs={12} sm={1}>
-                  <Typography variant="h6">Row: {row.row}</Typography>
-                </Grid>
-                <Grid
-                  container
-                  spacing={1}
-                  alignItems="center"
-                  justifyContent="center"
-                >
+                <Grid container alignItems="center" justifyContent="center">
+                  <Grid item xs={12} sm={1}>
+                    <Typography variant="h6" style={{ color: "white" }}>
+                      Row: {row.row}
+                    </Typography>
+                  </Grid>
                   {row.column.map((col) => (
                     <Grid item key={col.id}>
                       <Box
                         p={1}
                         border={1}
+                        borderRadius="8px"
                         borderColor="grey.500"
                         style={{
-                          opacity: col.disabled ? 0.5 : 1,
+                          width: "50px",
+                          height: "50px",
+                          opacity: col.disabled ? 0 : 1,
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
                           flexDirection: "column",
-                          backgroundColor: col.marked ? "red" : col.reserved ? "blue" : "transparent"
+                          backgroundColor: col.marked
+                            ? "#00FF00"
+                            : col.reserved
+                            ? "#D899FF"
+                            : "#CBCBCB",
                         }}
                       >
-                        <div>
-                          <Typography variant="body1">{col.column}</Typography>
+                        <div
+                          style={{
+                            width: "100%",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            style={{ whiteSpace: "nowrap" }}
+                          >
+                            {row.row}
+                            {col.column}
+                          </Typography>
                         </div>
-                        <div>
-                          <Typography variant="body1">{col.display}</Typography>
+                        <div
+                          style={{
+                            width: "100%",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          <Typography
+                            variant="caption"
+                            style={{ whiteSpace: "nowrap" }}
+                          >
+                            {col.display}
+                          </Typography>
                         </div>
                       </Box>
                     </Grid>
@@ -94,7 +121,9 @@ const SeatingPlan = (props) => {
       <hr />
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Typography mb={2}>Submit Event with guest data:</Typography>
+          <Typography mb={2} style={{ color: "white" }}>
+            Submit Event with guest data:
+          </Typography>
         </Grid>
         <Grid item xs={12}>
           <form onSubmit={handleSubmit}>
@@ -129,7 +158,9 @@ const SeatingPlan = (props) => {
                 />
               </Grid>
               <Grid item xs={12} sm={5}>
-                <Typography>Upload participant</Typography>
+                <Typography style={{ color: "white" }}>
+                  Upload participant
+                </Typography>
                 <input type="file" onChange={handleFileChange} />
               </Grid>
               <Grid item xs={12}>
