@@ -6,6 +6,7 @@ const SeatingPlan = (props) => {
   const [form, setForm] = useState({
     eventName: "",
     eventDate: "",
+    eventHouse: "",
     houseId: "",
     file: null,
   });
@@ -41,7 +42,7 @@ const SeatingPlan = (props) => {
     <Box>
       <div>
         <Typography variant="h3" style={{ color: "white" }}>
-          <b>{props.eventName}</b>
+          <b>{props.eventName}({props.eventHouse})</b>
         </Typography>
 
         {props.seat ? (

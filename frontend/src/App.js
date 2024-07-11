@@ -22,6 +22,7 @@ function App() {
   const [seatNo, setSeatNo] = useState(0);
   const [guestNo, setGuestNo] = useState(0);
   const [eventName, setEventName] = useState(null);
+  const [eventHouse, setEventHouse] = useState(null); // [ { house_id: 1, house_name: "house1" }
   let seatingPlan = {};
 
   const getEventData = (event) => {
@@ -62,6 +63,7 @@ function App() {
       let result = data.results[0];
       if (result) {
         setEventName(result.event_name);
+        setEventHouse(result.display_name);
         if (result.seating_plan == null) {
           updateEventSeatingPlan(eventId, seatingPlan);
         } else {
@@ -320,7 +322,12 @@ function App() {
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <SeatingPlan seat={seat} eventName={eventName} eventId={eventId} />
+          <SeatingPlan
+            seat={seat}
+            eventName={eventName}
+            eventHouse={eventHouse}
+            eventId={eventId}
+          />
         </Grid>
       </Grid>
     </div>
