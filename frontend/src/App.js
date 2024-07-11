@@ -15,9 +15,12 @@ import {
 function App() {
   const [eventId, setEventId] = useState("");
   const [guestData, setGuestData] = useState([]);
+  const [guestOptions, setGuestOptions] = useState([]); // [ { id: 1, ig: "name", tel: "123", guest_num: 1, checked: false }
   const [selectedValues, setSelectedValues] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [seat, setSeat] = useState(null);
+  const [seatNo, setSeatNo] = useState(0);
+  const [guestNo, setGuestNo] = useState(0);
   const [eventName, setEventName] = useState(null);
   let seatingPlan = {};
 
@@ -31,6 +34,28 @@ function App() {
 
     getSeatByEventId();
   };
+  useEffect(() => {
+    if (seat) {
+      setSeatNo(0);
+      seat.forEach((element) => {
+        setSeatNo((prev) => prev + element.availableSeat);
+      });
+    }
+  }, [seat]);
+
+  useEffect(() => {
+    if (guestData) {
+      const remainingGuests = guestData.filter((guest) => !guest.checked);
+      console.log(remainingGuests);
+      setGuestOptions(remainingGuests);
+    }
+  }, [guestData]);
+
+  useEffect(() => {
+    if (guestOptions) {
+      setGuestNo(guestOptions.length);
+    }
+  }, [guestOptions]);
 
   const getSeatByEventId = () => {
     fetchData(`/getSeatByEventId/${eventId}`).then((data) => {
@@ -73,11 +98,18 @@ function App() {
     );
     let seatingPlan = assignSeats(seat, selectedValues, totalGuestNum, 0, 0);
 
-    const remainingGuests = selectedValues.filter((guest) => !guest.assigned);
+    const updatedGuestData = guestData.map((guest) => {
+      const isSelected = selectedValues.some(
+        (selected) => selected.id === guest.id
+      );
+      return isSelected ? { ...guest, checked: true } : guest;
+    });
 
-    setSelectedValues(remainingGuests);
+    setSelectedValues([]);
+    setGuestData(updatedGuestData);
 
     updateEventSeatingPlan(eventId, seatingPlan);
+    updateEventParticipant(eventId, updatedGuestData);
   };
 
   const assignSeats = (
@@ -118,8 +150,8 @@ function App() {
         seatingPlan[row].column[col + i].marked = true;
         seatingPlan[row].column[col + i].display = selectedValues[0].ig;
       }
-      selectedValues[0].assigned = true;
-      console.log("Assigned seats from row:", row, "starting column:", col);
+      selectedValues[0].checked = true;
+      seatingPlan[row].availableSeat -= participants;
       return seatingPlan;
     } else {
       // Move to the next row if not enough seats are available in the current row
@@ -144,51 +176,116 @@ function App() {
     });
   };
 
+  const updateEventParticipant = (eventId, participant) => {
+    formSubmit(`/updateEventParticipant/${eventId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(participant),
+    }).then((data) => {
+      getSeatByEventId();
+      console.log("update success");
+    });
+  };
+
   return (
     <div className="App">
-      <Grid container spacing={2} justifyContent="center">
-        <Grid container item xs={6} alignItems="center" spacing={2}>
-          <form onSubmit={getEventData}>
-            <Grid container item xs={6} alignItems="center" spacing={2}>
-              <Grid item xs={12} sm={8} md={9}>
-                <TextField
-                  type="text"
-                  value={eventId}
-                  onChange={(e) => setEventId(e.target.value)}
-                  variant="outlined"
-                  placeholder="Enter event ID"
-                  margin="normal"
-                  fullWidth
-                />
+      <Grid container justifyContent="center">
+        <Grid container alignItems="center">
+          <Grid item xs={12} sm={6}>
+            <form onSubmit={getEventData}>
+              <Grid container alignItems="center">
+                <Grid item xs={12} sm={2}>
+                  <Typography variant="h6">Event Id:</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    type="text"
+                    value={eventId}
+                    onChange={(e) => setEventId(e.target.value)}
+                    variant="outlined"
+                    placeholder="Enter event ID"
+                    margin="normal"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    style={{ marginTop: "16px" }}
+                  >
+                    Submit
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item xs={12} sm={4} md={3}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  style={{ marginTop: "16px" }}
-                >
-                  Submit
-                </Button>
-              </Grid>
+            </form>
+          </Grid>
+          <Grid
+            container
+            item
+            xs={12}
+            sm={6}
+            justifyContent="center"
+            alignItems="center"
+            spacing={2}
+          >
+            <Grid item>
+              <Typography variant="h6">Guest List:</Typography>
             </Grid>
-          </form>
-        </Grid>
-        <Grid container item xs={6} alignItems="center" spacing={2}>
-          <Grid item xs={12} sm={6} justifyContent="center">
-            <Typography variant="h6">Guest List:</Typography>
-            <Autocomplete
-              multiple
-              value={selectedValues}
-              onChange={handleSelectionChange}
-              options={guestData}
-              getOptionLabel={(option) => option.tel} // Adjust according to your data structure
-              renderInput={(params) => (
-                <TextField {...params} label="Choose a guest" />
-              )}
-            />
-            <Button variant="contained" onClick={handleAssign}>
-              Assign seat
-            </Button>
+            <Grid item xs>
+              <Autocomplete
+                multiple
+                value={selectedValues}
+                onChange={handleSelectionChange}
+                options={guestOptions}
+                fullWidth
+                getOptionLabel={(option) => option.tel} // Adjust according to your data structure
+                renderInput={(params) => (
+                  <TextField {...params} label="Choose a guest" fullWidth />
+                )}
+              />
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                style={{ marginTop: "16px" }}
+                onClick={handleAssign}
+              >
+                Assign seat
+              </Button>
+            </Grid>
+          </Grid>
+          <Grid
+            container
+            item
+            xs={12}
+            sm={6}
+            justifyContent="center"
+            alignItems="center"
+            spacing={2}
+          >
+            <Grid item>
+              <Typography variant="h6">
+                Number of seat remain:{seatNo}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid
+            container
+            item
+            xs={12}
+            sm={6}
+            justifyContent="center"
+            alignItems="center"
+            spacing={2}
+          >
+            <Grid item>
+              <Typography variant="h6">
+                Number of guest remain:{guestNo}
+              </Typography>
+            </Grid>
           </Grid>
         </Grid>
         <Grid item xs={12}>

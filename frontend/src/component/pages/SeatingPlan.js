@@ -1,6 +1,6 @@
 import { Box, Button, Typography, TextField, Grid } from "@mui/material";
 import React, { useState, forwardRef } from "react";
-import { formSubmit } from "../util/utils";
+import { formSubmit, fetchData } from "../util/utils";
 
 const SeatingPlan = (props) => {
   const [form, setForm] = useState({
@@ -25,9 +25,15 @@ const SeatingPlan = (props) => {
     const formData = new FormData();
     Object.keys(form).forEach((key) => formData.append(key, form[key]));
 
-    formSubmit(`/uploadEvent`, {
-      method: "POST",
+    const response = fetchData(`/getHouse/${form.houseId}`, {
+      method: "GET",
       body: formData,
+    }).then((data) => {
+      formData.append("seat", data.results[0].seat);
+      formSubmit(`/uploadEvent`, {
+        method: "POST",
+        body: formData,
+      });
     });
   };
 
@@ -41,32 +47,30 @@ const SeatingPlan = (props) => {
         {props.seat ? (
           props.seat.map((row, rowIndex) => (
             <Box key={rowIndex} mb={2}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={2}>
+              <Grid container xs={12} alignItems="center">
+                <Grid item xs={12} sm={1}>
                   <Typography variant="h6">Row: {row.row}</Typography>
                 </Grid>
-                <Grid item xs={10}>
-                  <Box
-                    display="flex"
-                    flexDirection="row"
-                    justifyContent="center"
-                  >
-                    {row.column.map((col) => (
+                <Grid
+                  container
+                  spacing={1}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {row.column.map((col) => (
+                    <Grid item key={col.id}>
                       <Box
-                        key={col.id}
                         p={1}
                         border={1}
                         borderColor="grey.500"
                         style={{
                           opacity: col.disabled ? 0.5 : 1,
-                          marginRight: 8,
-                          width: "100px", // Fixed width
-                          height: "100px", // Fixed height
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
                           flexDirection: "column",
-                        }} // Added marginRight for space between boxes
+                          backgroundColor: col.marked ? "red" : col.reserved ? "blue" : "transparent"
+                        }}
                       >
                         <div>
                           <Typography variant="body1">{col.column}</Typography>
@@ -75,8 +79,8 @@ const SeatingPlan = (props) => {
                           <Typography variant="body1">{col.display}</Typography>
                         </div>
                       </Box>
-                    ))}
-                  </Box>
+                    </Grid>
+                  ))}
                 </Grid>
               </Grid>
             </Box>
