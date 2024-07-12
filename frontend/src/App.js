@@ -64,9 +64,15 @@ function App() {
         setEventName(result.event_name);
         setEventHouse(result.display_name);
         if (result.seating_plan == null) {
-          updateEventSeatingPlan(eventId, seatingPlan);
+          const request = {
+            seatingPlan: seatingPlan,
+            guestData: guestData,
+          }
+          updateEvent(eventId, request);
         } else {
+          console.log(result.seating_plan);
           seatingPlan = JSON.parse(result.seating_plan);
+          console.log(seatingPlan);
         }
         setSeat(seatingPlan);
       }
@@ -103,17 +109,17 @@ function App() {
       const isSelected = selectedValues.some(
         (selected) => selected.ig === guest.ig
       );
-      console.log(isSelected);
-      console.log(selectedValues);
       return isSelected ? { ...guest, checked: true } : guest;
     });
-    console.log(guestData);
 
     setSelectedValues([]);
     setGuestData(updatedGuestData);
 
-    updateEventSeatingPlan(eventId, seatingPlan);
-    updateEventParticipant(eventId, updatedGuestData);
+    const request = {
+      seatingPlan: seatingPlan,
+      guestData: updatedGuestData,
+    }
+    updateEvent(eventId, request);
   };
 
   const assignSeats = (seatingPlan, selectedValues, participants) => {
@@ -192,26 +198,13 @@ function App() {
     setSelectedValues(newValue);
   };
 
-  const updateEventSeatingPlan = (eventId, seatingPlan) => {
-    formSubmit(`/updateEventSeatingPlan/${eventId}`, {
+  const updateEvent = (eventId, event) => {
+    formSubmit(`/updateEvent/${eventId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(seatingPlan),
-    }).then((data) => {
-      getSeatByEventId();
-      console.log("update success");
-    });
-  };
-
-  const updateEventParticipant = (eventId, participant) => {
-    formSubmit(`/updateEventParticipant/${eventId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(participant),
+      body: JSON.stringify(event),
     }).then((data) => {
       getSeatByEventId();
       console.log("update success");

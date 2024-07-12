@@ -186,38 +186,19 @@ app.get("/getSeatByEventId/:eventId", cors(), async (req, res) => {
 });
 
 // update event seating plan
-app.post("/updateEventSeatingPlan/:eventId", cors(), async (req, res) => {
+app.post("/updateEvent/:eventId", cors(), async (req, res) => {
   try {
     const { eventId } = req.params;
-    const seatingPlan = JSON.stringify(req.body);
+    // const { seatingPlan, guestData } = req.body;
+    const { seatingPlan, guestData } = req.body;
     const client = await pool.connect();
     const result = await client.query(
-      "UPDATE event SET seating_plan = $1 WHERE event_id = $2",
-      [seatingPlan, eventId]
+      "UPDATE event SET seating_plan = $1, guest_data = $2 WHERE event_id = $3",
+      [JSON.stringify(seatingPlan), JSON.stringify(guestData), eventId]
     );
     res.json({
       status: "success",
       message: "Seating plan updated successfully",
-    });
-    client.release();
-  } catch (err) {
-    console.error(err);
-    res.send("Error " + err);
-  }
-});
-
-app.post("/updateEventParticipant/:eventId", cors(), async (req, res) => {
-  try {
-    const { eventId } = req.params;
-    const seatingPlan = JSON.stringify(req.body);
-    const client = await pool.connect();
-    const result = await client.query(
-      "UPDATE event SET guest_data = $1 WHERE event_id = $2",
-      [seatingPlan, eventId]
-    );
-    res.json({
-      status: "success",
-      message: "Participant updated successfully",
     });
     client.release();
   } catch (err) {
