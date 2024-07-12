@@ -1,7 +1,11 @@
 import SeatingPlan from "./component/pages/SeatingPlan";
 import { BrowserRouter as Router } from "react-router-dom";
-import { formSubmit, fetchData } from "./component/util/utils";
 import React, { useEffect, useState } from "react";
+import {
+  getSeatByEventIdApi,
+  getEventDataApi,
+  updateEventApi,
+} from "./component/util/api";
 
 import "./App.css";
 import {
@@ -9,7 +13,7 @@ import {
   Button,
   Autocomplete,
   TextField,
-  Grid
+  Grid,
 } from "@mui/material";
 
 function App() {
@@ -25,15 +29,14 @@ function App() {
   const [eventHouse, setEventHouse] = useState(null); // [ { house_id: 1, house_name: "house1" }
   let seatingPlan = {};
 
-  const getEventData = (event) => {
+  const getEventData = async (event) => {
     event.preventDefault();
-    fetchData(`/getEvent/${eventId}`).then((data) => {
-      if (data) {
-        setGuestData(JSON.parse(data.guest_data));
+    getEventDataApi(eventId).then((response) => {
+      if (response) {
+        setGuestData(JSON.parse(response));
+        getSeatByEventId();
       }
     });
-
-    getSeatByEventId();
   };
   useEffect(() => {
     if (seat) {
@@ -58,21 +61,18 @@ function App() {
   }, [guestOptions]);
 
   const getSeatByEventId = () => {
-    fetchData(`/getSeatByEventId/${eventId}`).then((data) => {
-      let result = data.results[0];
-      if (result) {
-        setEventName(result.event_name);
-        setEventHouse(result.display_name);
-        if (result.seating_plan == null) {
+    getSeatByEventIdApi(eventId).then((response) => {
+      if (response) {
+        setEventName(response.event_name);
+        setEventHouse(response.display_name);
+        if (response.seat == null) {
           const request = {
             seatingPlan: seatingPlan,
             guestData: guestData,
-          }
-          updateEvent(eventId, request);
+          };
+          updateEventApi(eventId, request);
         } else {
-          console.log(result.seating_plan);
-          seatingPlan = JSON.parse(result.seating_plan);
-          console.log(seatingPlan);
+          seatingPlan = JSON.parse(response.seat);
         }
         setSeat(seatingPlan);
       }
@@ -118,8 +118,8 @@ function App() {
     const request = {
       seatingPlan: seatingPlan,
       guestData: updatedGuestData,
-    }
-    updateEvent(eventId, request);
+    };
+    updateEventApi(eventId, request);
   };
 
   const assignSeats = (seatingPlan, selectedValues, participants) => {
@@ -198,24 +198,11 @@ function App() {
     setSelectedValues(newValue);
   };
 
-  const updateEvent = (eventId, event) => {
-    formSubmit(`/updateEvent/${eventId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(event),
-    }).then((data) => {
-      getSeatByEventId();
-      console.log("update success");
-    });
-  };
-
   return (
     <div
       className="App"
       style={{
-        backgroundColor: "#000000",
+        // backgroundColor: "#000000",
         color: "#fffff",
         // backgroundImage: "url('Twisters.jpeg')", // Update this path
         // backgroundSize: "cover", // Cover the entire page

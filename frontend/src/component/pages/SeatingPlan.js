@@ -1,4 +1,16 @@
-import { Box, Button, Typography, TextField, Grid, Paper } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Typography,
+  TextField,
+  Grid,
+  Paper,
+  Checkbox,
+  FormControlLabel,
+} from "@mui/material";
 import React, { useState, forwardRef } from "react";
 import { formSubmit, fetchData } from "../util/utils";
 
@@ -10,14 +22,29 @@ const SeatingPlan = (props) => {
     houseId: "",
     file: null,
   });
+  const [open, setOpen] = useState(false);
+  const [selectedCol, setSelectedCol] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const handleClick = (event) => {
+    setSelectedCol({ ...selectedCol, [event.target.name]: event.target.checked });
+  };
+
   const handleFileChange = (e) => {
     setForm((prevState) => ({ ...prevState, file: e.target.files[0] }));
+  };
+
+  const handleClickOpen = (col) => {
+    setSelectedCol(col);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const handleSubmit = (e) => {
@@ -26,7 +53,7 @@ const SeatingPlan = (props) => {
     const formData = new FormData();
     Object.keys(form).forEach((key) => formData.append(key, form[key]));
 
-    const response = fetchData(`/getHouse/${form.houseId}`, {
+    fetchData(`/getHouse/${form.houseId}`, {
       method: "GET",
       body: formData,
     }).then((data) => {
@@ -36,6 +63,12 @@ const SeatingPlan = (props) => {
         body: formData,
       });
     });
+  };
+
+  const updateSeatingPlan = () => {
+    // Implement the logic to update the seating plan here
+    console.log("Seating plan updated:", selectedCol);
+    // You might want to send this data to a backend server or update it locally
   };
 
   return (
@@ -54,7 +87,7 @@ const SeatingPlan = (props) => {
               padding: "8px 32px",
               backgroundColor: "#424242",
               color: "white",
-              width: "50%"
+              width: "50%",
             }}
           >
             <Typography variant="h5">Screen</Typography>
@@ -76,7 +109,8 @@ const SeatingPlan = (props) => {
                     </Grid>
                     {row.column.map((col) => (
                       <Grid item key={col.id}>
-                        <Box
+                        <Button
+                          onClick={() => handleClickOpen(col)}
                           p={1}
                           border={1}
                           borderRadius="8px"
@@ -125,7 +159,7 @@ const SeatingPlan = (props) => {
                               {col.display}
                             </Typography>
                           </div>
-                        </Box>
+                        </Button>
                       </Grid>
                     ))}
                   </Grid>
@@ -137,6 +171,51 @@ const SeatingPlan = (props) => {
             <td>Loading...</td>
           </tr>
         )}
+        <Dialog open={open} onClose={handleClose} sx={{ minWidth: 250 }}>
+          <DialogTitle>Seat Details</DialogTitle>
+          <DialogContent>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={selectedCol.marked}
+                  onChange={handleClick}
+                  name="marked"
+                  color="primary"
+                />
+              }
+              label="Marked"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={selectedCol.disabled}
+                  onChange={handleClick}
+                  name="disabled"
+                  color="primary"
+                />
+              }
+              label="Disabled"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={selectedCol.reserved}
+                  onChange={handleClick}
+                  name="reserved"
+                  color="primary"
+                />
+              }
+              label="Reserved"
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={updateSeatingPlan}
+            >
+              Save
+            </Button>
+          </DialogContent>
+        </Dialog>
       </div>
       <hr />
       <Grid container spacing={2}>
