@@ -1,4 +1,4 @@
-import { Box, Button, Typography, TextField, Grid } from "@mui/material";
+import { Box, Button, Typography, TextField, Grid, Paper } from "@mui/material";
 import React, { useState, forwardRef } from "react";
 import { formSubmit, fetchData } from "../util/utils";
 
@@ -41,78 +41,97 @@ const SeatingPlan = (props) => {
   return (
     <Box>
       <div>
-        <Typography variant="h3" style={{ color: "white" }}>
-          <b>{props.eventName}({props.eventHouse})</b>
+        <Typography variant="h3" style={{ color: "white" }} mb={2}>
+          <b>
+            {props.eventName}({props.eventHouse})
+          </b>
         </Typography>
 
+        <Box mb={4} display="flex" justifyContent="center">
+          <Paper
+            elevation={3}
+            style={{
+              padding: "8px 32px",
+              backgroundColor: "#424242",
+              color: "white",
+              width: "50%"
+            }}
+          >
+            <Typography variant="h5">Screen</Typography>
+          </Paper>
+        </Box>
+
         {props.seat ? (
-          props.seat.map((row, rowIndex) => (
-            <Box key={rowIndex} mb={2}>
-              <Grid container xs={12} alignItems="center">
-                <Grid container alignItems="center" justifyContent="center">
-                  <Grid item xs={12} sm={1}>
-                    <Typography variant="h6" style={{ color: "white" }}>
-                      Row: {row.row}
-                    </Typography>
-                  </Grid>
-                  {row.column.map((col) => (
-                    <Grid item key={col.id}>
-                      <Box
-                        p={1}
-                        border={1}
-                        borderRadius="8px"
-                        borderColor="grey.500"
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          opacity: col.disabled ? 0 : 1,
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          flexDirection: "column",
-                          backgroundColor: col.marked
-                            ? "#00FF00"
-                            : col.reserved
-                            ? "#D899FF"
-                            : "#CBCBCB",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "100%",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          <Typography
-                            variant="body1"
-                            style={{ whiteSpace: "nowrap" }}
-                          >
-                            {row.row}
-                            {col.column}
-                          </Typography>
-                        </div>
-                        <div
-                          style={{
-                            width: "100%",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          <Typography
-                            variant="caption"
-                            style={{ whiteSpace: "nowrap" }}
-                          >
-                            {col.display}
-                          </Typography>
-                        </div>
-                      </Box>
+          props.seat
+            .slice()
+            .reverse()
+            .map((row, rowIndex) => (
+              <Box key={rowIndex} mb={2}>
+                <Grid container xs={12} alignItems="center">
+                  <Grid container alignItems="center" justifyContent="center">
+                    <Grid item xs={12} sm={1}>
+                      <Typography variant="h6" style={{ color: "white" }}>
+                        Row: {row.row}
+                      </Typography>
                     </Grid>
-                  ))}
+                    {row.column.map((col) => (
+                      <Grid item key={col.id}>
+                        <Box
+                          p={1}
+                          border={1}
+                          borderRadius="8px"
+                          borderColor="grey.500"
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            opacity: col.disabled ? 0 : 1,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            flexDirection: "column",
+                            backgroundColor: col.marked
+                              ? "#00FF00"
+                              : col.reserved
+                              ? "#D899FF"
+                              : "#CBCBCB",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: "100%",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            <Typography
+                              variant="body1"
+                              style={{ whiteSpace: "nowrap" }}
+                            >
+                              {row.row}
+                              {col.column}
+                            </Typography>
+                          </div>
+                          <div
+                            style={{
+                              width: "100%",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              style={{ whiteSpace: "nowrap" }}
+                            >
+                              {col.display}
+                            </Typography>
+                          </div>
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
                 </Grid>
-              </Grid>
-            </Box>
-          ))
+              </Box>
+            ))
         ) : (
           <tr>
             <td>Loading...</td>
@@ -136,6 +155,11 @@ const SeatingPlan = (props) => {
                   label="Movie Name"
                   value={form.eventName}
                   onChange={handleChange}
+                  InputProps={{
+                    style: {
+                      backgroundColor: "white", // Background color changed to white
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={5}>
@@ -147,6 +171,11 @@ const SeatingPlan = (props) => {
                   InputLabelProps={{ shrink: true }}
                   value={form.eventDate}
                   onChange={handleChange}
+                  InputProps={{
+                    style: {
+                      backgroundColor: "white", // Background color changed to white
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={5}>
@@ -156,6 +185,11 @@ const SeatingPlan = (props) => {
                   label="House id"
                   value={form.houseId}
                   onChange={handleChange}
+                  InputProps={{
+                    style: {
+                      backgroundColor: "white", // Background color changed to white
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={5}>

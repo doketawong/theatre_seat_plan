@@ -9,7 +9,7 @@ import {
   Button,
   Autocomplete,
   TextField,
-  Grid,
+  Grid
 } from "@mui/material";
 
 function App() {
@@ -47,7 +47,6 @@ function App() {
   useEffect(() => {
     if (guestData) {
       const remainingGuests = guestData.filter((guest) => !guest.checked);
-      console.log(remainingGuests);
       setGuestOptions(remainingGuests);
     }
   }, [guestData]);
@@ -296,11 +295,7 @@ function App() {
                     {...params}
                     label="Choose a guest"
                     fullWidth
-                    InputProps={{
-                      style: {
-                        backgroundColor: "white", // Background color changed to white
-                      },
-                    }}
+                    style={{ backgroundColor: "white" }}
                   />
                 )}
               />
