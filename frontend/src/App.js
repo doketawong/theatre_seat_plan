@@ -117,51 +117,76 @@ function App() {
     updateEventParticipant(eventId, updatedGuestData);
   };
 
-  const assignSeats = (
+  const assignSeats = (seatingPlan, selectedValues, participants) => {
+    // Try to seat participants in a single row.
+    for (let row = 0; row < seatingPlan.length; row++) {
+      if (tryAssignSeatsInRow(seatingPlan[row], selectedValues, participants)) {
+        return seatingPlan;
+      }
+    }
+
+    // If unable to seat all participants together, distribute them across available seats.
+    distributeParticipantsAcrossSeats(
+      seatingPlan,
+      selectedValues,
+      participants
+    );
+    return seatingPlan;
+  };
+
+  const tryAssignSeatsInRow = (row, selectedValues, participants) => {
+    let seatsAvailable = 0;
+    for (let col = 0; col < row.column.length; col++) {
+      if (isSeatAvailable(row.column[col])) {
+        seatsAvailable++;
+        if (seatsAvailable === participants) {
+          markSeatsFromTo(
+            row.column,
+            col - participants + 1,
+            col,
+            selectedValues[0].ig
+          );
+          return true;
+        }
+      } else {
+        seatsAvailable = 0; // Reset if a seat is not suitable
+      }
+    }
+    return false;
+  };
+
+  const distributeParticipantsAcrossSeats = (
     seatingPlan,
     selectedValues,
-    participants,
-    row = 0,
-    col = 0
+    participants
   ) => {
-    // Base case: No participants left to seat or no more rows available.
-    if (participants <= 0 || row >= seatingPlan.length) {
-      return seatingPlan;
-    }
-
-    // Check if there are enough consecutive seats in the current row
-    let seatsAvailable = 0;
-    for (
-      let i = col;
-      i < seatingPlan[row].column.length && seatsAvailable < participants;
-      i++
-    ) {
-      if (
-        !seatingPlan[row].column[i].reserved &&
-        !seatingPlan[row].column[i].disabled &&
-        !seatingPlan[row].column[i].marked
+    for (let row = 0; row < seatingPlan.length && participants > 0; row++) {
+      for (
+        let col = 0;
+        col < seatingPlan[row].column.length && participants > 0;
+        col++
       ) {
-        seatsAvailable++;
-      } else {
-        // Reset seatsAvailable if a seat is not suitable
-        seatsAvailable = 0;
-        col = i + 1;
+        if (isSeatAvailable(seatingPlan[row].column[col])) {
+          markSeat(seatingPlan[row].column[col], selectedValues[0].ig);
+          participants--;
+        }
       }
     }
+  };
 
-    // If enough seats are available, assign them
-    if (seatsAvailable === participants) {
-      for (let i = 0; i < participants; i++) {
-        seatingPlan[row].column[col + i].marked = true;
-        seatingPlan[row].column[col + i].display = selectedValues[0].ig;
-      }
-      selectedValues[0].checked = true;
-      seatingPlan[row].availableSeat -= participants;
-      return seatingPlan;
-    } else {
-      // Move to the next row if not enough seats are available in the current row
-      return assignSeats(seatingPlan, selectedValues, participants, row + 1, 0);
+  const isSeatAvailable = (seat) => {
+    return !seat.reserved && !seat.disabled && !seat.marked;
+  };
+
+  const markSeatsFromTo = (seats, start, end, displayValue) => {
+    for (let i = start; i <= end; i++) {
+      markSeat(seats[i], displayValue);
     }
+  };
+
+  const markSeat = (seat, displayValue) => {
+    seat.marked = true;
+    seat.display = displayValue;
   };
 
   const handleSelectionChange = (event, newValue) => {
@@ -200,10 +225,10 @@ function App() {
       style={{
         backgroundColor: "#000000",
         color: "#fffff",
-        backgroundImage: "url('Twisters.jpeg')", // Update this path
-        backgroundSize: "cover", // Cover the entire page
-        backgroundPosition: "center", // Center the background image
-        backgroundRepeat: "no-repeat", // Do not repeat the image
+        // backgroundImage: "url('Twisters.jpeg')", // Update this path
+        // backgroundSize: "cover", // Cover the entire page
+        // backgroundPosition: "center", // Center the background image
+        // backgroundRepeat: "no-repeat", // Do not repeat the image
       }}
     >
       <Grid container justifyContent="center">
