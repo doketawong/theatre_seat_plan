@@ -3,9 +3,9 @@ const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
 const { Pool } = require("pg");
-const csvtojson = require('csvtojson');
+const csvtojson = require("csvtojson");
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 app.use(cors());
 // parse application/x-www-form-urlencoded
@@ -107,7 +107,7 @@ app.get("/getHouse/:houseId", cors(), async (req, res) => {
 const upload = multer({ dest: "uploads/" });
 app.post("/uploadEvent", upload.single("file"), async (req, res) => {
   try {
-    const { eventName, eventDate, houseId } = req.body;
+    const { eventName, eventDate, houseId, seat } = req.body;
     const file = req.file;
     let fileContent = "";
 
@@ -118,10 +118,21 @@ app.post("/uploadEvent", upload.single("file"), async (req, res) => {
     const client = await pool.connect();
 
     const insertEventQuery = `
-      INSERT INTO event (event_name, event_date, house_id, guest_data)
-      VALUES ($1, $2, $3, $4)`;
+      INSERT INTO event (event_name, event_date, house_id, guest_data, seating_Plan)
+      VALUES ($1, $2, $3, $4, $5)`;
+    const replacer = (key, value) => {
+      if (value === "true") return true;
+      if (value === "false") return false;
+      return value; // return the value unchanged if not a string boolean
+    };
 
-    const values = [eventName, eventDate, houseId, JSON.stringify(fileContent)];
+    const values = [
+      eventName,
+      eventDate,
+      houseId,
+      JSON.stringify(fileContent, replacer),
+      seat,
+    ];
 
     const result = await client.query(insertEventQuery, values);
 
@@ -178,13 +189,16 @@ app.get("/getSeatByEventId/:eventId", cors(), async (req, res) => {
 app.post("/updateEventSeatingPlan/:eventId", cors(), async (req, res) => {
   try {
     const { eventId } = req.params;
-    const { seatingPlan } = req.body;
+    const seatingPlan = JSON.stringify(req.body);
     const client = await pool.connect();
     const result = await client.query(
       "UPDATE event SET seating_plan = $1 WHERE event_id = $2",
       [seatingPlan, eventId]
     );
-    res.json({ status: 'success', message: 'Seating plan updated successfully' });
+    res.json({
+      status: "success",
+      message: "Seating plan updated successfully",
+    });
     client.release();
   } catch (err) {
     console.error(err);
@@ -192,6 +206,25 @@ app.post("/updateEventSeatingPlan/:eventId", cors(), async (req, res) => {
   }
 });
 
+app.post("/updateEventParticipant/:eventId", cors(), async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const seatingPlan = JSON.stringify(req.body);
+    const client = await pool.connect();
+    const result = await client.query(
+      "UPDATE event SET guest_data = $1 WHERE event_id = $2",
+      [seatingPlan, eventId]
+    );
+    res.json({
+      status: "success",
+      message: "Participant updated successfully",
+    });
+    client.release();
+  } catch (err) {
+    console.error(err);
+    res.send("Error " + err);
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
