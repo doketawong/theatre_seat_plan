@@ -25,6 +25,7 @@ const SeatingPlan = (props) => {
   });
   const [open, setOpen] = useState(false);
   const [selectedCol, setSelectedCol] = useState({});
+  const [selectedSeat, setSelectedSeat] = useState({});
   const [houses, setHouses] = useState([]);
 
   useEffect(() => {
@@ -49,8 +50,10 @@ const SeatingPlan = (props) => {
     setForm((prevState) => ({ ...prevState, file: e.target.files[0] }));
   };
 
-  const handleClickOpen = (col) => {
+  const handleClickOpen = (col, row) => {
+    const seat = row.row + col.column;
     setSelectedCol(col);
+    setSelectedSeat(seat);
     setOpen(true);
   };
 
@@ -119,7 +122,7 @@ const SeatingPlan = (props) => {
                     {row.column.map((col) => (
                       <Grid item key={col.id}>
                         <Button
-                          onClick={() => handleClickOpen(col)}
+                          onClick={() => handleClickOpen(col, row)}
                           p={1}
                           border={1}
                           borderRadius="8px"
@@ -181,7 +184,8 @@ const SeatingPlan = (props) => {
           </tr>
         )}
         <Dialog open={open} onClose={handleClose} sx={{ minWidth: 250 }}>
-          <DialogTitle>Seat Details</DialogTitle>
+          <DialogTitle>Seat {selectedSeat} Details</DialogTitle>
+          <DialogContent>IG: { selectedCol.display }</DialogContent>
           <DialogContent>
             <FormControlLabel
               control={
