@@ -51,6 +51,7 @@ function App() {
     if (guestData) {
       const remainingGuests = guestData.filter((guest) => !guest.checked);
       setGuestOptions(remainingGuests);
+      console.log('remainingGuests: ', remainingGuests);
     }
   }, [guestData]);
 
@@ -72,7 +73,7 @@ function App() {
           };
           updateEventApi(eventId, request);
         } else {
-          seatingPlan = JSON.parse(response.seat);
+          seatingPlan = JSON.parse(response.seating_plan);
         }
         setSeat(seatingPlan);
       }
@@ -269,7 +270,7 @@ function App() {
                 onChange={handleSelectionChange}
                 options={guestOptions}
                 fullWidth
-                getOptionLabel={(option) => option.tel} // Adjust according to your data structure
+                getOptionLabel={(option) => { return 'tel: ' + option.tel + '; IG: ' + option.ig + '; email: ' + option.email }} // Adjust according to your data structure
                 renderInput={(params) => (
                   <TextField
                     {...params}
