@@ -76,7 +76,7 @@ CREATE TABLE public."event" (
 	seating_plan varchar NULL,
 	CONSTRAINT event_pkey PRIMARY KEY (event_id)
 );
-// form submit with guest.csv
+// form submit with guest.csva
 
 
 

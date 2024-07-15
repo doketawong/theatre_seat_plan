@@ -10,20 +10,28 @@ import {
   Paper,
   Checkbox,
   FormControlLabel,
+  Autocomplete,
 } from "@mui/material";
-import React, { useState, forwardRef } from "react";
-import { formSubmit, fetchData } from "../util/utils";
+import React, { useState, forwardRef, useEffect } from "react";
+import { uploadEventApi, getHouseByIdApi, getAllHouseApi } from "../util/api";
 
 const SeatingPlan = (props) => {
   const [form, setForm] = useState({
     eventName: "",
     eventDate: "",
     eventHouse: "",
-    houseId: "",
+    houseIds: [],
     file: null,
   });
   const [open, setOpen] = useState(false);
   const [selectedCol, setSelectedCol] = useState({});
+  const [houses, setHouses] = useState([]);
+
+  useEffect(() => {
+    getAllHouseApi().then((data) => {
+      setHouses(data.results);
+    });
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,7 +39,10 @@ const SeatingPlan = (props) => {
   };
 
   const handleClick = (event) => {
-    setSelectedCol({ ...selectedCol, [event.target.name]: event.target.checked });
+    setSelectedCol({
+      ...selectedCol,
+      [event.target.name]: event.target.checked,
+    });
   };
 
   const handleFileChange = (e) => {
@@ -53,15 +64,13 @@ const SeatingPlan = (props) => {
     const formData = new FormData();
     Object.keys(form).forEach((key) => formData.append(key, form[key]));
 
-    fetchData(`/getHouse/${form.houseId}`, {
-      method: "GET",
-      body: formData,
-    }).then((data) => {
-      formData.append("seat", data.results[0].seat);
-      formSubmit(`/uploadEvent`, {
-        method: "POST",
-        body: formData,
-      });
+    getHouseByIdApi(form.houseIds).then((data) => {
+      console.log(data.results);
+      const seatsJoined = data.results.reduce((acc, val) => acc.concat(val), []).join(",");
+      console.log(seatsJoined);
+      // console.log(seatsJoined);
+      // formData.append("seat", data);
+      // uploadEventApi(formData);
     });
   };
 
@@ -258,18 +267,40 @@ const SeatingPlan = (props) => {
                 />
               </Grid>
               <Grid item xs={12} sm={5}>
-                <TextField
-                  fullWidth
-                  name="houseId"
-                  label="House id"
-                  value={form.houseId}
-                  onChange={handleChange}
-                  InputProps={{
-                    style: {
-                      backgroundColor: "white", // Background color changed to white
-                    },
-                  }}
-                />
+                {houses && houses.length > 0 ? (
+                  <Autocomplete
+                    multiple
+                    fullWidth
+                    options={houses}
+                    getOptionLabel={(option) => option.display_name}
+                    value={
+                      // Find multiple houses based on an array of houseIds
+                      houses.filter((house) =>
+                        form.houseIds.includes(house.house_id)
+                      ) || []
+                    }
+                    onChange={(event, newValue) => {
+                      setForm({
+                        ...form,
+                        houseIds: newValue.map((item) => item.house_id),
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="House id"
+                        InputProps={{
+                          ...params.InputProps,
+                          style: {
+                            backgroundColor: "white", // Keep the background color as white
+                          },
+                        }}
+                      />
+                    )}
+                  />
+                ) : (
+                  <p>No houses available</p>
+                )}
               </Grid>
               <Grid item xs={12} sm={5}>
                 <Typography style={{ color: "white" }}>

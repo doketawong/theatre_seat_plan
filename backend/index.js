@@ -103,6 +103,44 @@ app.get("/getHouse/:houseId", cors(), async (req, res) => {
   }
 });
 
+app.get("/getHousesByIds", cors(), async (req, res) => {
+  try {
+    // Step 2: Accept 'ids' as a query parameter and split it into an array
+    const ids = req.query.ids.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+
+    // Check if ids array is not empty
+    if (ids.length === 0) {
+      return res.status(400).send("No valid IDs provided");
+    }
+
+    const client = await pool.connect();
+
+    // Step 4: Construct SQL query using ANY to select multiple rows
+    const query = "SELECT * FROM house WHERE id = ANY($1)";
+    const result = await client.query(query, [ids]);
+
+    const results = { results: result ? result.rows : null };
+    res.json(results);
+    client.release();
+  } catch (err) {
+    console.error(err);
+    res.send("Error " + err);
+  }
+});
+
+app.get("/getHouse", cors(), async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query("SELECT * FROM house");
+    const results = { results: result ? result.rows : null };
+    res.json(results);
+    client.release();
+  } catch (err) {
+    console.error(err);
+    res.send("Error " + err);
+  }
+});
+
 // upload new Event
 const upload = multer({ dest: "uploads/" });
 app.post("/uploadEvent", upload.single("file"), async (req, res) => {

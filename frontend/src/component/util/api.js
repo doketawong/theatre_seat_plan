@@ -24,3 +24,30 @@ export const getSeatByEventIdApi = (eventId) => {
     return data.results[0];
   });
 };
+
+export const getHouseApi = (houseIds) => {
+  const houseId = houseIds.join(",");
+
+  return fetchData(`/getHouse/${houseId}`, {
+    method: "GET",
+  });
+};
+
+export const getHouseByIdApi = (houseId) => {
+  return fetchData(`/getHousesByIds/${houseId}`, {
+    method: "GET",
+  });
+}
+
+export const getAllHouseApi = () => {
+  return fetchData(`/getHouse`, {
+    method: "GET",
+  });
+};
+
+export const uploadEventApi = (formData) => {
+  return formSubmit(`/uploadEvent`, {
+    method: "POST",
+    body: formData,
+  });
+};
