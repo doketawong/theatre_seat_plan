@@ -68,12 +68,10 @@ const SeatingPlan = (props) => {
     Object.keys(form).forEach((key) => formData.append(key, form[key]));
 
     getHouseByIdApi(form.houseIds).then((data) => {
-      console.log(data.results);
-      const seatsJoined = data.results.reduce((acc, val) => acc.concat(val), []).join(",");
-      console.log(seatsJoined);
-      // console.log(seatsJoined);
-      // formData.append("seat", data);
-      // uploadEventApi(formData);
+      const seatsArray = data.results.reduce((acc, val) => acc.concat(val.seat), []);
+      const seatsJoined = seatsArray.join(",");
+      formData.append("seat", seatsJoined);
+      uploadEventApi(formData);
     });
   };
 

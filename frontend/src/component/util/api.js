@@ -26,15 +26,16 @@ export const getSeatByEventIdApi = (eventId) => {
 };
 
 export const getHouseApi = (houseIds) => {
-  const houseId = houseIds.join(",");
 
-  return fetchData(`/getHouse/${houseId}`, {
+  return fetchData(`/getHouse/${houseIds}`, {
     method: "GET",
   });
 };
 
-export const getHouseByIdApi = (houseId) => {
-  return fetchData(`/getHousesByIds/${houseId}`, {
+export const getHouseByIdApi = (houseIds) => {
+  const houseId = houseIds.join(",");
+
+  return fetchData(`/getHousesByIds/ids?ids=${houseId}`, {
     method: "GET",
   });
 }

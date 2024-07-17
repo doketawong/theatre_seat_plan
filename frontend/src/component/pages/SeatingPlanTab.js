@@ -44,8 +44,7 @@ const SeatingPlanTab = ({ plans }) => {
             eventName={eventName}
             eventHouse={eventHouse}
             eventId={eventId}
-          />{" "}
-          {/* Pass props as needed */}
+          />
         </TabPanel>
       ))}
     </div>

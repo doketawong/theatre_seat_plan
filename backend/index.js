@@ -103,10 +103,10 @@ app.get("/getHouse/:houseId", cors(), async (req, res) => {
   }
 });
 
-app.get("/getHousesByIds", cors(), async (req, res) => {
+app.get("/getHousesByIds/ids", cors(), async (req, res) => {
   try {
     // Step 2: Accept 'ids' as a query parameter and split it into an array
-    const ids = req.query.ids.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+    const ids = req.query.ids.split(',').map(id => parseInt(id, 10)).filter(id => !isNaN(id));
 
     // Check if ids array is not empty
     if (ids.length === 0) {
@@ -116,7 +116,7 @@ app.get("/getHousesByIds", cors(), async (req, res) => {
     const client = await pool.connect();
 
     // Step 4: Construct SQL query using ANY to select multiple rows
-    const query = "SELECT * FROM house WHERE id = ANY($1)";
+    const query = "SELECT * FROM house WHERE house_id = ANY($1)";
     const result = await client.query(query, [ids]);
 
     const results = { results: result ? result.rows : null };
@@ -145,7 +145,7 @@ app.get("/getHouse", cors(), async (req, res) => {
 const upload = multer({ dest: "uploads/" });
 app.post("/uploadEvent", upload.single("file"), async (req, res) => {
   try {
-    const { eventName, eventDate, houseId, seat } = req.body;
+    const { eventName, eventDate, seat } = req.body;
     const file = req.file;
     let fileContent = "";
 
@@ -156,8 +156,8 @@ app.post("/uploadEvent", upload.single("file"), async (req, res) => {
     const client = await pool.connect();
 
     const insertEventQuery = `
-      INSERT INTO event (event_name, event_date, house_id, guest_data, seating_Plan)
-      VALUES ($1, $2, $3, $4, $5)`;
+      INSERT INTO event (event_name, event_date, guest_data, seating_Plan)
+      VALUES ($1, $2, $3, $4)`;
     const replacer = (key, value) => {
       if (value === "true") return true;
       if (value === "false") return false;
@@ -167,7 +167,6 @@ app.post("/uploadEvent", upload.single("file"), async (req, res) => {
     const values = [
       eventName,
       eventDate,
-      houseId,
       JSON.stringify(fileContent, replacer),
       seat,
     ];
