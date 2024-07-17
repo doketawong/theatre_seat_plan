@@ -203,7 +203,7 @@ function App() {
     <div
       className="App"
       style={{
-        // backgroundColor: "#000000",
+        backgroundColor: "#000000",
         color: "#fffff",
         // backgroundImage: "url('Twisters.jpeg')", // Update this path
         // backgroundSize: "cover", // Cover the entire page
