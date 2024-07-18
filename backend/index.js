@@ -141,6 +141,19 @@ app.get("/getHouse", cors(), async (req, res) => {
   }
 });
 
+app.get("/getEvent", cors(), async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query("SELECT event_id, event_name FROM event order by event_id desc");
+    const results = { results: result ? result.rows : null };
+    res.json(results);
+    client.release();
+  } catch (err) {
+    console.error(err);
+    res.send("Error " + err);
+  }
+});
+
 // upload new Event
 const upload = multer({ dest: "uploads/" });
 app.post("/uploadEvent", upload.single("file"), async (req, res) => {
@@ -210,7 +223,7 @@ app.get("/getSeatByEventId/:eventId", cors(), async (req, res) => {
     const { eventId } = req.params;
     const client = await pool.connect();
     const result = await client.query(
-      "select * from house h left join event e on h.house_id = e.house_id where e.event_id = $1",
+      "select * from event e where e.event_id = $1",
       [eventId]
     );
     const results = { results: result ? result.rows : null };
