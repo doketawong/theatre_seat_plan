@@ -1,10 +1,10 @@
-import SeatingPlan from "./component/pages/SeatingPlan";
 import { BrowserRouter as Router } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import {
   getSeatByEventIdApi,
   getEventDataApi,
   updateEventApi,
+  getAllEventApi,
 } from "./component/util/api";
 
 import "./App.css";
@@ -15,6 +15,11 @@ import {
   TextField,
   Grid,
 } from "@mui/material";
+
+import SeatAssignmentPopup from "./component/util/seatPopup";
+import SeatingPlanTab from "./component/pages/SeatingPlanTab";
+import SeatingPlan from "./component/pages/SeatingPlan";
+import UploadPage from "./component/pages/UploadEvent";
 
 function App() {
   const [eventId, setEventId] = useState("");
@@ -27,6 +32,10 @@ function App() {
   const [guestNo, setGuestNo] = useState(0);
   const [eventName, setEventName] = useState(null);
   const [eventHouse, setEventHouse] = useState(null); // [ { house_id: 1, house_name: "house1" }
+  const [event, setEvent] = useState([]);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [assignedSeats, setAssignedSeats] = useState([]);
+
   let seatingPlan = {};
 
   const getEventData = async (event) => {
@@ -48,10 +57,15 @@ function App() {
   }, [seat]);
 
   useEffect(() => {
+    getAllEventApi().then((response) => {
+      setEvent(response.results);
+    });
+  }, []);
+
+  useEffect(() => {
     if (guestData) {
       const remainingGuests = guestData.filter((guest) => !guest.checked);
       setGuestOptions(remainingGuests);
-      console.log('remainingGuests: ', remainingGuests);
     }
   }, [guestData]);
 
@@ -66,7 +80,7 @@ function App() {
       if (response) {
         setEventName(response.event_name);
         setEventHouse(response.display_name);
-        if (response.seat == null) {
+        if (response.seating_plan == null) {
           const request = {
             seatingPlan: seatingPlan,
             guestData: guestData,
@@ -75,6 +89,7 @@ function App() {
         } else {
           seatingPlan = JSON.parse(response.seating_plan);
         }
+        console.log(seatingPlan);
         setSeat(seatingPlan);
       }
     });
@@ -104,7 +119,10 @@ function App() {
       (acc, guest) => acc + parseInt(guest.guest_num, 10),
       0
     );
+    setAssignedSeats([]);
     let seatingPlan = assignSeats(seat, selectedValues, totalGuestNum, 0, 0);
+
+    setIsPopupVisible(true); // Show the popup
 
     const updatedGuestData = guestData.map((guest) => {
       const isSelected = selectedValues.some(
@@ -150,7 +168,8 @@ function App() {
             row.column,
             col - participants + 1,
             col,
-            selectedValues[0].ig
+            selectedValues[0].ig,
+            row.row
           );
           return true;
         }
@@ -173,7 +192,11 @@ function App() {
         col++
       ) {
         if (isSeatAvailable(seatingPlan[row].column[col])) {
-          markSeat(seatingPlan[row].column[col], selectedValues[0].ig);
+          markSeat(
+            seatingPlan[row].column[col],
+            selectedValues[0].ig,
+            seatingPlan[row].row
+          );
           participants--;
         }
       }
@@ -184,15 +207,17 @@ function App() {
     return !seat.reserved && !seat.disabled && !seat.marked;
   };
 
-  const markSeatsFromTo = (seats, start, end, displayValue) => {
+  const markSeatsFromTo = (seats, start, end, displayValue, row) => {
     for (let i = start; i <= end; i++) {
-      markSeat(seats[i], displayValue);
+      markSeat(seats[i], displayValue, row);
     }
   };
 
-  const markSeat = (seat, displayValue) => {
+  const markSeat = (seat, displayValue, row) => {
     seat.marked = true;
     seat.display = displayValue;
+    const seatNo = `${row}${seat.column}`;
+    setAssignedSeats((prev) => [...prev, seatNo]);
   };
 
   const handleSelectionChange = (event, newValue) => {
@@ -203,7 +228,7 @@ function App() {
     <div
       className="App"
       style={{
-        backgroundColor: "#000000",
+        // backgroundColor: "#000000",
         color: "#fffff",
         // backgroundImage: "url('Twisters.jpeg')", // Update this path
         // backgroundSize: "cover", // Cover the entire page
@@ -222,20 +247,31 @@ function App() {
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField
-                    type="text"
-                    value={eventId}
-                    onChange={(e) => setEventId(e.target.value)}
-                    variant="outlined"
-                    placeholder="Enter event ID"
-                    margin="normal"
-                    fullWidth
-                    InputProps={{
-                      style: {
-                        backgroundColor: "white", // Background color changed to white
-                      },
-                    }}
-                  />
+                  {event && event.length > 0 ? (
+                    <Autocomplete
+                      fullWidth
+                      options={event}
+                      getOptionLabel={(option) => option.event_name}
+                      value={event.find((item) => item.event_id === eventId)}
+                      onChange={(event, newValue) => {
+                        setEventId(newValue.event_id);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Event id"
+                          InputProps={{
+                            ...params.InputProps,
+                            style: {
+                              backgroundColor: "white", // Keep the background color as white
+                            },
+                          }}
+                        />
+                      )}
+                    />
+                  ) : (
+                    <p>No event available</p>
+                  )}
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <Button
@@ -270,7 +306,16 @@ function App() {
                 onChange={handleSelectionChange}
                 options={guestOptions}
                 fullWidth
-                getOptionLabel={(option) => { return 'tel: ' + option.tel + '; IG: ' + option.ig + '; email: ' + option.email }} // Adjust according to your data structure
+                getOptionLabel={(option) => {
+                  return (
+                    "tel: " +
+                    option.tel +
+                    "; IG: " +
+                    option.ig +
+                    "; email: " +
+                    option.email
+                  );
+                }} // Adjust according to your data structure
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -289,6 +334,11 @@ function App() {
               >
                 Assign seat
               </Button>
+              <SeatAssignmentPopup
+                seats={assignedSeats}
+                open={isPopupVisible}
+                onClose={() => setIsPopupVisible(false)}
+              />
             </Grid>
           </Grid>
           <Grid
@@ -322,13 +372,13 @@ function App() {
             </Grid>
           </Grid>
         </Grid>
+
         <Grid item xs={12}>
-          <SeatingPlan
-            seat={seat}
-            eventName={eventName}
-            eventHouse={eventHouse}
-            eventId={eventId}
-          />
+          <SeatingPlanTab seatingData={seat}  eventName={eventName} eventHouse={eventHouse}/>
+        </Grid>
+
+        <Grid item xs={12}>
+          <UploadPage />
         </Grid>
       </Grid>
     </div>

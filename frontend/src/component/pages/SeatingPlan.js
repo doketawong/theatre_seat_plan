@@ -5,49 +5,24 @@ import {
   DialogTitle,
   DialogContent,
   Typography,
-  TextField,
   Grid,
   Paper,
   Checkbox,
   FormControlLabel,
-  Autocomplete,
 } from "@mui/material";
-import React, { useState, forwardRef, useEffect } from "react";
-import { uploadEventApi, getHouseByIdApi, getAllHouseApi } from "../util/api";
+import { useState } from "react";
 
-const SeatingPlan = (props) => {
-  const [form, setForm] = useState({
-    eventName: "",
-    eventDate: "",
-    eventHouse: "",
-    houseIds: [],
-    file: null,
-  });
+const SeatingPlan = ({seat, eventName, eventHouse}) => {
+
   const [open, setOpen] = useState(false);
   const [selectedCol, setSelectedCol] = useState({});
   const [selectedSeat, setSelectedSeat] = useState({});
-  const [houses, setHouses] = useState([]);
-
-  useEffect(() => {
-    getAllHouseApi().then((data) => {
-      setHouses(data.results);
-    });
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prevState) => ({ ...prevState, [name]: value }));
-  };
 
   const handleClick = (event) => {
     setSelectedCol({
       ...selectedCol,
       [event.target.name]: event.target.checked,
     });
-  };
-
-  const handleFileChange = (e) => {
-    setForm((prevState) => ({ ...prevState, file: e.target.files[0] }));
   };
 
   const handleClickOpen = (col, row) => {
@@ -61,20 +36,6 @@ const SeatingPlan = (props) => {
     setOpen(false);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const formData = new FormData();
-    Object.keys(form).forEach((key) => formData.append(key, form[key]));
-
-    getHouseByIdApi(form.houseIds).then((data) => {
-      const seatsArray = data.results.reduce((acc, val) => acc.concat(val.seat), []);
-      const seatsJoined = seatsArray.join(",");
-      formData.append("seat", seatsJoined);
-      uploadEventApi(formData);
-    });
-  };
-
   const updateSeatingPlan = () => {
     // Implement the logic to update the seating plan here
     console.log("Seating plan updated:", selectedCol);
@@ -86,7 +47,7 @@ const SeatingPlan = (props) => {
       <div>
         <Typography variant="h3" style={{ color: "white" }} mb={2}>
           <b>
-            {props.eventName}({props.eventHouse})
+            {eventName}({eventHouse})
           </b>
         </Typography>
 
@@ -104,8 +65,8 @@ const SeatingPlan = (props) => {
           </Paper>
         </Box>
 
-        {props.seat ? (
-          props.seat
+        {seat ? (
+          seat
             .slice()
             .reverse()
             .map((row, rowIndex) => (
@@ -183,7 +144,7 @@ const SeatingPlan = (props) => {
         )}
         <Dialog open={open} onClose={handleClose} sx={{ minWidth: 250 }}>
           <DialogTitle>Seat {selectedSeat} Details</DialogTitle>
-          <DialogContent>IG: { selectedCol.display }</DialogContent>
+          <DialogContent>IG: {selectedCol.display}</DialogContent>
           <DialogContent>
             <FormControlLabel
               control={
@@ -229,98 +190,8 @@ const SeatingPlan = (props) => {
         </Dialog>
       </div>
       <hr />
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Typography mb={2} style={{ color: "white" }}>
-            Submit Event with guest data:
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={2} justifyContent="center">
-              <Grid item xs={12} sm={5}>
-                <TextField
-                  fullWidth
-                  name="eventName"
-                  label="Movie Name"
-                  value={form.eventName}
-                  onChange={handleChange}
-                  InputProps={{
-                    style: {
-                      backgroundColor: "white", // Background color changed to white
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={5}>
-                <TextField
-                  fullWidth
-                  name="eventDate"
-                  label="Event Date"
-                  type="datetime-local"
-                  InputLabelProps={{ shrink: true }}
-                  value={form.eventDate}
-                  onChange={handleChange}
-                  InputProps={{
-                    style: {
-                      backgroundColor: "white", // Background color changed to white
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={5}>
-                {houses && houses.length > 0 ? (
-                  <Autocomplete
-                    multiple
-                    fullWidth
-                    options={houses}
-                    getOptionLabel={(option) => option.display_name}
-                    value={
-                      // Find multiple houses based on an array of houseIds
-                      houses.filter((house) =>
-                        form.houseIds.includes(house.house_id)
-                      ) || []
-                    }
-                    onChange={(event, newValue) => {
-                      setForm({
-                        ...form,
-                        houseIds: newValue.map((item) => item.house_id),
-                      });
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="House id"
-                        InputProps={{
-                          ...params.InputProps,
-                          style: {
-                            backgroundColor: "white", // Keep the background color as white
-                          },
-                        }}
-                      />
-                    )}
-                  />
-                ) : (
-                  <p>No houses available</p>
-                )}
-              </Grid>
-              <Grid item xs={12} sm={5}>
-                <Typography style={{ color: "white" }}>
-                  Upload participant
-                </Typography>
-                <input type="file" onChange={handleFileChange} />
-              </Grid>
-              <Grid item xs={12}>
-                <Button type="submit" variant="contained">
-                  Submit
-                </Button>
-              </Grid>
-            </Grid>
-          </form>
-        </Grid>
-      </Grid>
     </Box>
   );
 };
 
-export default forwardRef(SeatingPlan);
+export default SeatingPlan;

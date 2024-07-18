@@ -52,3 +52,9 @@ export const uploadEventApi = (formData) => {
     body: formData,
   });
 };
+
+export const getAllEventApi = () => {
+  return fetchData(`/getEvent`, {
+    method: "GET",
+  });
+};
