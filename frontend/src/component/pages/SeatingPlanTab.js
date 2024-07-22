@@ -28,8 +28,6 @@ const SeatingPlanTab = ({ seatingData, eventName, eventHouse }) => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        {" "}
-        {/* Grid item for Tabs */}
         <Tabs
           value={value}
           onChange={handleChange}
@@ -50,7 +48,7 @@ const SeatingPlanTab = ({ seatingData, eventName, eventHouse }) => {
         {seatingData?.map((seat, index) => (
           <TabPanel key={index} value={value} index={index}>
             <SeatingPlan
-              seat={seat}
+              seat={seat.seatInfo}
               eventName={eventName}
               eventHouse={eventHouse}
             />

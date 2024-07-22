@@ -37,9 +37,11 @@ function UploadPage() {
     Object.keys(form).forEach((key) => formData.append(key, form[key]));
 
     getHouseByIdApi(form.houseIds).then((data) => {
-      const seatsArray = data.results.map((val) =>
-        JSON.parse(val.seat.replace(/\n/g, "").trim())
-      );
+      const seatsArray = data.results.map((val) => {
+        const seatInfo = JSON.parse(val.seat.replace(/\n/g, "").trim());
+        const houseDisplay  = val.display_name;
+        return {seatInfo, houseDisplay};
+      });
       formData.append("seat", JSON.stringify(seatsArray));
       uploadEventApi(formData);
     });

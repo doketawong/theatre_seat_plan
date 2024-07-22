@@ -9,11 +9,11 @@ import {
   Paper,
   Checkbox,
   FormControlLabel,
+  TextField,
 } from "@mui/material";
 import { useState } from "react";
 
-const SeatingPlan = ({seat, eventName, eventHouse}) => {
-
+const SeatingPlan = ({ seat, eventName, eventHouse }) => {
   const [open, setOpen] = useState(false);
   const [selectedCol, setSelectedCol] = useState({});
   const [selectedSeat, setSelectedSeat] = useState({});
@@ -34,6 +34,13 @@ const SeatingPlan = ({seat, eventName, eventHouse}) => {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleTextChange = (event) => {
+    setSelectedCol({
+      ...selectedCol,
+      [event.target.name]: event.target.value,
+    });
   };
 
   const updateSeatingPlan = () => {
@@ -144,7 +151,25 @@ const SeatingPlan = ({seat, eventName, eventHouse}) => {
         )}
         <Dialog open={open} onClose={handleClose} sx={{ minWidth: 250 }}>
           <DialogTitle>Seat {selectedSeat} Details</DialogTitle>
-          <DialogContent>IG: {selectedCol.display}</DialogContent>
+          {selectedCol.marked ? (
+            <DialogContent>
+              <FormControlLabel
+                control={
+                  <TextField
+                    defaultValue={selectedCol.display}
+                    onChange={handleTextChange}
+                    name="textValue"
+                    variant="outlined"
+                    size="small"
+                  />
+                }
+                label="IG"
+                labelPlacement="start"
+              />
+            </DialogContent>
+          ) : (
+            ""
+          )}
           <DialogContent>
             <FormControlLabel
               control={

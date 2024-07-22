@@ -143,14 +143,15 @@ function App() {
     let bestPlanScore = { bestScore: 0, bestPosition: null, index: 0 };
     seatingPlan.forEach((plan, index) => {
       let bestSeat = null;
-      for (let row = 0; row < plan.length; row++) {
+      const houseRow = plan.seatInfo;
+      for (let row = 0; row < houseRow.length; row++) {
         bestSeat = findSeatsAndCalculateScore(
-          plan[row],
+          houseRow[row],
           participants,
           index,
           row,
           bestPlanScore.bestScore,
-          plan.length
+          houseRow.length
         );
         if (bestSeat && bestSeat.bestScore >= bestPlanScore.bestScore) {
           bestPlanScore = bestSeat;
@@ -165,13 +166,17 @@ function App() {
         participants
       );
     } else {
-      const selectedSeatingPlan = seatingPlan[bestPlanScore.index];
+      const selectedHouse = seatingPlan[bestPlanScore.index];
+      const selectedSeatingPlan = selectedHouse.seatInfo;
+      const selectedRow = selectedSeatingPlan[bestPlanScore.rowIndex];  
+      const selectedHouseName = selectedHouse.houseDisplay;
       markSeatsFromTo(
-        selectedSeatingPlan[bestPlanScore.rowIndex].column,
+        selectedRow.column,
         bestPlanScore.bestPosition.start,
         bestPlanScore.bestPosition.end,
         selectedValues[0].ig,
-        selectedSeatingPlan[bestPlanScore.rowIndex].row
+        selectedRow.row,
+        selectedHouseName
       );
     }
     return seatingPlan;
@@ -192,7 +197,7 @@ function App() {
       if (isSeatAvailable(row.column[col])) {
         seatsAvailable++;
         if (seatsAvailable === participants) {
-          let score = houseRowLength - rowIndex; 
+          let score = houseRowLength - rowIndex;
           if (score >= bestScore) {
             bestScore = score;
             bestPosition = { start: col - participants + 1, end: col };
@@ -211,10 +216,14 @@ function App() {
     selectedValues,
     participants
   ) => {
-    for (let theaterId = 0; theaterId < seatingPlan.length; theaterId++) {
-      const theater = seatingPlan[theaterId];
-      for (let rowId = 0; rowId < theater[theaterId].length && participants > 0; rowId++) {
-        const row = theater[theaterId];
+    for (let houseId = 0; houseId < seatingPlan.length; houseId++) {
+      const house = seatingPlan[houseId];
+      for (
+        let rowId = 0;
+        rowId < house[houseId].length && participants > 0;
+        rowId++
+      ) {
+        const row = house[houseId];
         for (
           let col = 0;
           col < row[rowId].column.length && participants > 0;
@@ -237,17 +246,24 @@ function App() {
     return !seat.reserved && !seat.disabled && !seat.marked;
   };
 
-  const markSeatsFromTo = (seats, start, end, displayValue, row) => {
+  const markSeatsFromTo = (
+    seats,
+    start,
+    end,
+    displayValue,
+    row,
+    selectedHouseName
+  ) => {
     for (let i = start; i <= end; i++) {
-      markSeat(seats[i], displayValue, row);
+      markSeat(seats[i], displayValue, row, selectedHouseName);
     }
   };
 
-  const markSeat = (seat, displayValue, row) => {
+  const markSeat = (seat, displayValue, row, house) => {
     seat.marked = true;
     seat.display = displayValue;
     const seatNo = `${row}${seat.column}`;
-    setAssignedSeats((prev) => [...prev, seatNo]);
+    setAssignedSeats((prev) => [...prev, { seatNo, house }]);
   };
 
   const handleSelectionChange = (event, newValue) => {
