@@ -8,15 +8,6 @@ const SeatingPlanTab = ({ seatingData, eventName, eventHouse }) => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-  useEffect(() => {
-    if (Array.isArray(seatingData)) {
-      seatingData.forEach((seat) => {
-        console.log(seat);
-      });
-    } else {
-      console.log("seatingData is not an array:", seatingData);
-    }
-  }, [seatingData]);
 
   function TabPanel(props) {
     const { children, value, index, ...other } = props;

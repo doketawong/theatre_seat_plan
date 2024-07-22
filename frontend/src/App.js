@@ -18,7 +18,6 @@ import {
 
 import SeatAssignmentPopup from "./component/util/seatPopup";
 import SeatingPlanTab from "./component/pages/SeatingPlanTab";
-import SeatingPlan from "./component/pages/SeatingPlan";
 import UploadPage from "./component/pages/UploadEvent";
 
 function App() {
@@ -89,7 +88,6 @@ function App() {
         } else {
           seatingPlan = JSON.parse(response.seating_plan);
         }
-        console.log(seatingPlan);
         setSeat(seatingPlan);
       }
     });
@@ -142,84 +140,51 @@ function App() {
   };
 
   const assignSeats = (seatingPlan, selectedValues, participants) => {
-    let bestPlanScore = null;
+    let bestPlanScore = { bestScore: 0, bestPosition: null, index: 0 };
     seatingPlan.forEach((plan, index) => {
       let bestSeat = null;
-
       for (let row = 0; row < plan.length; row++) {
-        bestSeat = findSeatsAndCalculateScore(plan[row], participants, index);
-      }
-
-      if (bestSeat.bestScore > bestPlanScore.bestScore) {
-        bestPlanScore = bestSeat;
+        bestSeat = findSeatsAndCalculateScore(
+          plan[row],
+          participants,
+          index,
+          row,
+          bestPlanScore.bestScore,
+          plan.length
+        );
+        if (bestSeat && bestSeat.bestScore >= bestPlanScore.bestScore) {
+          bestPlanScore = bestSeat;
+        }
       }
     });
 
-    if (bestPlanScore.bestScore === 0) {
+    if (bestPlanScore.bestScore === -1) {
       distributeParticipantsAcrossSeats(
-        seatingPlan[bestPlanScore.index],
+        seatingPlan,
         selectedValues,
         participants
       );
     } else {
-      console.log(
-        seatingPlan[bestPlanScore.index].column,
+      const selectedSeatingPlan = seatingPlan[bestPlanScore.index];
+      markSeatsFromTo(
+        selectedSeatingPlan[bestPlanScore.rowIndex].column,
         bestPlanScore.bestPosition.start,
         bestPlanScore.bestPosition.end,
         selectedValues[0].ig,
-        seatingPlan[bestPlanScore.index]
+        selectedSeatingPlan[bestPlanScore.rowIndex].row
       );
-      // markSeatsFromTo(
-      //   seatingPlan[bestPlanScore.index].column,
-      //   bestPlanScore.bestPosition.start,
-      //   bestPlanScore.bestPosition.end,
-      //   selectedValues[0].ig,
-      //   seatingplan[bestPlanScore.index]
-      // );
     }
-
-    // return bestPlan;
-
-    // // Try to seat participants in a single row.
-    // for (let row = 0; row < seatingPlan.length; row++) {
-    //   if (tryAssignSeatsInRow(seatingPlan[row], selectedValues, participants)) {
-    //     return seatingPlan;
-    //   }
-    // }
-
-    // // If unable to seat all participants together, distribute them across available seats.
-    // distributeParticipantsAcrossSeats(
-    //   seatingPlan,
-    //   selectedValues,
-    //   participants
-    // );
-    // return seatingPlan;
+    return seatingPlan;
   };
 
-  const tryAssignSeatsInRow = (row, selectedValues, participants) => {
-    let seatsAvailable = 0;
-    for (let col = 0; col < row.column.length; col++) {
-      if (isSeatAvailable(row.column[col])) {
-        seatsAvailable++;
-        if (seatsAvailable === participants) {
-          markSeatsFromTo(
-            row.column,
-            col - participants + 1,
-            col,
-            selectedValues[0].ig,
-            row.row
-          );
-          return true;
-        }
-      } else {
-        seatsAvailable = 0; // Reset if a seat is not suitable
-      }
-    }
-    return false;
-  };
-
-  const findSeatsAndCalculateScore = (row, participants, index) => {
-    let bestScore = -1;
+  const findSeatsAndCalculateScore = (
+    row,
+    participants,
+    index,
+    rowIndex,
+    bestScore,
+    houseRowLength
+  ) => {
     let bestPosition = null;
 
     let seatsAvailable = 0;
@@ -227,25 +192,18 @@ function App() {
       if (isSeatAvailable(row.column[col])) {
         seatsAvailable++;
         if (seatsAvailable === participants) {
-          // Calculate score for this position
-          // For simplicity, we're just using the column index as the score
-          // You can replace this with a more complex calculation
-          let score = col; // Example score calculation
-
-          if (score > bestScore) {
+          let score = houseRowLength - rowIndex; 
+          if (score >= bestScore) {
             bestScore = score;
             bestPosition = { start: col - participants + 1, end: col };
+            return { bestScore, bestPosition, index, rowIndex };
           }
-
-          // Reset seatsAvailable after finding a potential spot
-          seatsAvailable = 0;
         }
       } else {
         seatsAvailable = 0; // Reset if a seat is not suitable
       }
     }
-
-    return { bestScore, bestPosition, index };
+    return null;
   };
 
   const distributeParticipantsAcrossSeats = (
@@ -253,19 +211,23 @@ function App() {
     selectedValues,
     participants
   ) => {
-    for (let row = 0; row < seatingPlan.length && participants > 0; row++) {
-      for (
-        let col = 0;
-        col < seatingPlan[row].column.length && participants > 0;
-        col++
-      ) {
-        if (isSeatAvailable(seatingPlan[row].column[col])) {
-          markSeat(
-            seatingPlan[row].column[col],
-            selectedValues[0].ig,
-            seatingPlan[row].row
-          );
-          participants--;
+    for (let theaterId = 0; theaterId < seatingPlan.length; theaterId++) {
+      const theater = seatingPlan[theaterId];
+      for (let rowId = 0; rowId < theater[theaterId].length && participants > 0; rowId++) {
+        const row = theater[theaterId];
+        for (
+          let col = 0;
+          col < row[rowId].column.length && participants > 0;
+          col++
+        ) {
+          if (isSeatAvailable(row[rowId].column[col])) {
+            markSeat(
+              row[rowId].column[col],
+              selectedValues[0].ig,
+              row[rowId].row
+            );
+            participants--;
+          }
         }
       }
     }
