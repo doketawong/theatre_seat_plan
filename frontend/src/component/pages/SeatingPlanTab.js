@@ -1,12 +1,38 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { Tabs, Tab, Box, Grid } from "@mui/material";
 import SeatingPlan from "./SeatingPlan"; // Assuming this is your seating plan component
+import {
+  updateEventApi,
+} from "../util/api";
 
-const SeatingPlanTab = ({ seatingData, eventName, eventHouse, guest }) => {
+const SeatingPlanTab = ({
+  seatingData,
+  eventId,
+  eventName,
+  eventHouse,
+  guest,
+}) => {
   const [value, setValue] = useState(0);
+  const [seatingState, setSeatingState] = useState(seatingData);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+  };
+
+  const updateSeatInfo = (index, newSeatInfo, updatedGuestData) => {
+    const updatedSeatingData = seatingData.map((seat, seatIndex) => {
+      if (seatIndex === index) {
+        return { ...seat, seatInfo: newSeatInfo };
+      }
+      return seat;
+    });
+    setSeatingState(updatedSeatingData);
+
+    const request = {
+      seatingPlan: updatedSeatingData,
+      guestData: updatedGuestData,
+    };
+    updateEventApi(eventId, request);
   };
 
   function TabPanel(props) {
@@ -52,6 +78,10 @@ const SeatingPlanTab = ({ seatingData, eventName, eventHouse, guest }) => {
               eventName={eventName}
               eventHouse={eventHouse}
               guest={guest}
+              onUpdateSeatInfo={(newSeatInfo, updatedGuestData) =>
+                updateSeatInfo(index, newSeatInfo, updatedGuestData)
+              }
+              index={index}
             />
           </TabPanel>
         ))}

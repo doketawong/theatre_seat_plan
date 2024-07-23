@@ -14,12 +14,19 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-const SeatingPlan = ({ seat, eventName, eventHouse, guest }) => {
+const SeatingPlan = ({
+  seat,
+  eventName,
+  eventHouse,
+  guest,
+  onUpdateSeatInfo,
+  index,
+}) => {
   const [open, setOpen] = useState(false);
   const [selectedCol, setSelectedCol] = useState({});
   const [selectedSeat, setSelectedSeat] = useState({});
   const [selectedGuest, setSelectedGuest] = useState([]);
-  const [selectedReserved, setSelectedReserved] = useState(false);
+  const [selectedReserved, setSelectedReserved] = useState("");
 
   const handleClick = (event) => {
     setSelectedCol({
@@ -45,7 +52,6 @@ const SeatingPlan = ({ seat, eventName, eventHouse, guest }) => {
   };
 
   const updateSeatingPlan = () => {
-    console.log(selectedGuest);
     const updatedSeats = seat.map((temp) => {
       const updatedColumn = temp.column.map((col) => {
         if (col.id === selectedCol.id && col.column === selectedCol.column) {
@@ -56,15 +62,28 @@ const SeatingPlan = ({ seat, eventName, eventHouse, guest }) => {
             col.marked = true;
 
             selectedGuest.guest_num = (guestNum - 1).toString(); // Decrement guest_num and convert back to string if necessary
+            temp.availableSeat--;
             if (selectedGuest.guest_num === "0") {
               selectedGuest.checked = true;
+            }
+
+            const guestIndex = guest.findIndex(
+              (temp) => temp.id === selectedGuest.id
+            ); // Assuming each guest has a unique 'id' for comparison
+            if (guestIndex !== -1) {
+              guest[guestIndex] = { ...guest[guestIndex], ...selectedGuest }; // Update the guest in the list with the properties of selectGuest
             }
           } else if (selectedCol.reserved) {
             col.display = selectedReserved;
             col.reserved = true;
-          } else {
+          } else if (!selectedCol.marked) {
             selectedGuest.guest_num = (guestNum + 1).toString();
             selectedGuest.checked = false;
+            temp.availableSeat++;
+            col.display = "";
+            col.marked = false;
+            col.reserved = false;
+          } else {
             col.display = "";
             col.marked = false;
             col.reserved = false;
@@ -76,8 +95,7 @@ const SeatingPlan = ({ seat, eventName, eventHouse, guest }) => {
       temp.column = updatedColumn;
       return temp;
     });
-
-    console.log(selectedGuest);
+    onUpdateSeatInfo(updatedSeats, guest);
     setOpen(false);
   };
 
@@ -234,7 +252,7 @@ const SeatingPlan = ({ seat, eventName, eventHouse, guest }) => {
                     onChange={handleTextChange}
                   />
                 }
-                label="IG"
+                label="Name"
                 labelPlacement="start"
               />
             </DialogContent>

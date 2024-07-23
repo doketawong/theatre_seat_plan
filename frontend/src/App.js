@@ -49,8 +49,10 @@ function App() {
   useEffect(() => {
     if (seat) {
       setSeatNo(0);
-      seat.forEach((element) => {
-        setSeatNo((prev) => prev + element.availableSeat);
+      seat.forEach((house) => {
+        house.seatInfo.forEach((row) => {
+        setSeatNo((prev) => prev + row.availableSeat);
+        });
       });
     }
   }, [seat]);
@@ -264,7 +266,7 @@ function App() {
     <div
       className="App"
       style={{
-        // backgroundColor: "#000000",
+        backgroundColor: "#000000",
         color: "#fffff",
         // backgroundImage: "url('Twisters.jpeg')", // Update this path
         // backgroundSize: "cover", // Cover the entire page
@@ -412,6 +414,7 @@ function App() {
         <Grid item xs={12}>
           <SeatingPlanTab
             seatingData={seat}
+            eventId={eventId}
             eventName={eventName}
             eventHouse={eventHouse}
             guest={guestData}
