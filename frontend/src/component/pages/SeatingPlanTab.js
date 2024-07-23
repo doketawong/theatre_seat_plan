@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Tabs, Tab, Box, Grid } from "@mui/material";
 import SeatingPlan from "./SeatingPlan"; // Assuming this is your seating plan component
 
-const SeatingPlanTab = ({ seatingData, eventName, eventHouse }) => {
+const SeatingPlanTab = ({ seatingData, eventName, eventHouse, guest }) => {
   const [value, setValue] = useState(0);
 
   const handleChange = (event, newValue) => {
@@ -51,6 +51,7 @@ const SeatingPlanTab = ({ seatingData, eventName, eventHouse }) => {
               seat={seat.seatInfo}
               eventName={eventName}
               eventHouse={eventHouse}
+              guest={guest}
             />
           </TabPanel>
         ))}

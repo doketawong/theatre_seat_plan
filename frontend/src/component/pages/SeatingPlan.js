@@ -10,13 +10,16 @@ import {
   Checkbox,
   FormControlLabel,
   TextField,
+  Autocomplete,
 } from "@mui/material";
 import { useState } from "react";
 
-const SeatingPlan = ({ seat, eventName, eventHouse }) => {
+const SeatingPlan = ({ seat, eventName, eventHouse, guest }) => {
   const [open, setOpen] = useState(false);
   const [selectedCol, setSelectedCol] = useState({});
   const [selectedSeat, setSelectedSeat] = useState({});
+  const [selectedGuest, setSelectedGuest] = useState([]);
+  const [selectedReserved, setSelectedReserved] = useState(false);
 
   const handleClick = (event) => {
     setSelectedCol({
@@ -29,6 +32,7 @@ const SeatingPlan = ({ seat, eventName, eventHouse }) => {
     const seat = row.row + col.column;
     setSelectedCol(col);
     setSelectedSeat(seat);
+    setSelectedGuest(guest.find((g) => g.ig === col.display));
     setOpen(true);
   };
 
@@ -37,16 +41,49 @@ const SeatingPlan = ({ seat, eventName, eventHouse }) => {
   };
 
   const handleTextChange = (event) => {
-    setSelectedCol({
-      ...selectedCol,
-      [event.target.name]: event.target.value,
-    });
+    setSelectedReserved(event.target.value);
   };
 
   const updateSeatingPlan = () => {
-    // Implement the logic to update the seating plan here
-    console.log("Seating plan updated:", selectedCol);
-    // You might want to send this data to a backend server or update it locally
+    console.log(selectedGuest);
+    const updatedSeats = seat.map((temp) => {
+      const updatedColumn = temp.column.map((col) => {
+        if (col.id === selectedCol.id && col.column === selectedCol.column) {
+          // Simplify the logic by directly setting the properties based on conditions
+          let guestNum = parseInt(selectedGuest.guest_num, 10); // Convert guest_num to integer
+          if (selectedCol.marked && guestNum > 0) {
+            col.display = selectedGuest.ig;
+            col.marked = true;
+
+            selectedGuest.guest_num = (guestNum - 1).toString(); // Decrement guest_num and convert back to string if necessary
+            if (selectedGuest.guest_num === "0") {
+              selectedGuest.checked = true;
+            }
+          } else if (selectedCol.reserved) {
+            col.display = selectedReserved;
+            col.reserved = true;
+          } else {
+            selectedGuest.guest_num = (guestNum + 1).toString();
+            selectedGuest.checked = false;
+            col.display = "";
+            col.marked = false;
+            col.reserved = false;
+          }
+        }
+
+        return col;
+      });
+      temp.column = updatedColumn;
+      return temp;
+    });
+
+    console.log(selectedGuest);
+    setOpen(false);
+  };
+
+  const handleSelectGuest = (event, newValue) => {
+    // Complex logic to determine the selected guest
+    setSelectedGuest(newValue);
   };
 
   return (
@@ -155,12 +192,46 @@ const SeatingPlan = ({ seat, eventName, eventHouse }) => {
             <DialogContent>
               <FormControlLabel
                 control={
+                  <Autocomplete
+                    fullWidth
+                    value={selectedGuest}
+                    options={guest}
+                    getOptionLabel={(option) => option.ig}
+                    onChange={handleSelectGuest}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="IG"
+                        InputProps={{
+                          ...params.InputProps,
+                          style: {
+                            backgroundColor: "white", // Keep the background color as white
+                            width: "500px",
+                          },
+                        }}
+                        style={{
+                          width: "500px", // Adjust this value to set the desired width
+                        }}
+                      />
+                    )}
+                  />
+                }
+                label="IG"
+                labelPlacement="start"
+              />
+            </DialogContent>
+          ) : (
+            ""
+          )}
+          {selectedCol.reserved ? (
+            <DialogContent>
+              <FormControlLabel
+                control={
                   <TextField
-                    defaultValue={selectedCol.display}
-                    onChange={handleTextChange}
-                    name="textValue"
                     variant="outlined"
                     size="small"
+                    value={selectedReserved}
+                    onChange={handleTextChange}
                   />
                 }
                 label="IG"

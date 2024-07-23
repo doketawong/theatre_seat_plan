@@ -93,16 +93,6 @@ function App() {
     });
   };
 
-  const handleCheck = (index) => {
-    const newGuestData = [...guestData];
-    newGuestData[index].checked =
-      newGuestData[index].checked === "true" ? "false" : "true";
-    setGuestData(newGuestData);
-  };
-
-  const handleButtonClick = () => {
-    const checkedGuests = guestData.filter((guest) => guest.checked === "true");
-  };
 
   const searchGuestList = (ig, tel) => {
     return (
@@ -126,7 +116,7 @@ function App() {
       const isSelected = selectedValues.some(
         (selected) => selected.ig === guest.ig
       );
-      return isSelected ? { ...guest, checked: true } : guest;
+      return isSelected ? { ...guest, checked: true, guest_num: "0" } : guest;
     });
 
     setSelectedValues([]);
@@ -424,6 +414,7 @@ function App() {
             seatingData={seat}
             eventName={eventName}
             eventHouse={eventHouse}
+            guest={guestData}
           />
         </Grid>
 
