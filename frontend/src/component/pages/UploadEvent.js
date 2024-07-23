@@ -39,9 +39,21 @@ function UploadPage() {
     getHouseByIdApi(form.houseIds).then((data) => {
       const seatsArray = data.results.map((val) => {
         const seatInfo = JSON.parse(val.seat.replace(/\n/g, "").trim());
+        
         const houseDisplay  = val.display_name;
         return {seatInfo, houseDisplay};
       });
+
+      seatsArray.forEach((item) => {
+        const { seatInfo, houseDisplay } = item;
+seatInfo.forEach((row, rowIndex) => {
+  // Assuming an updated condition to check for available seats that are not marked, disabled, or reserved
+  // This is a placeholder condition; the actual implementation may vary based on how such seats are represented
+  const availableSeats = row.column.filter(seat =>  !seat.marked && !seat.disabled && !seat.reserved).length;
+  console.log(`House: ${houseDisplay}, Row: ${rowIndex + 1}, Available Seats: ${availableSeats}`);
+});
+      });
+
       formData.append("seat", JSON.stringify(seatsArray));
       uploadEventApi(formData);
     });

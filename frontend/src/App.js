@@ -65,6 +65,7 @@ function App() {
 
   useEffect(() => {
     if (guestData) {
+      console.log(guestData);
       const remainingGuests = guestData.filter((guest) => !guest.checked);
       setGuestOptions(remainingGuests);
     }

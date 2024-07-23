@@ -137,7 +137,7 @@ const SeatingPlan = ({
                   <Grid container alignItems="center" justifyContent="center">
                     <Grid item xs={12} sm={1}>
                       <Typography variant="h6" style={{ color: "white" }}>
-                        Row: {row.row}
+                        Row: {row.row} {row.availableSeat}
                       </Typography>
                     </Grid>
                     {row.column.map((col) => (
