@@ -48,14 +48,28 @@ function App() {
   };
   useEffect(() => {
     if (seat) {
-      setSeatNo(0);
-      seat.forEach((house) => {
-        house.seatInfo.forEach((row) => {
-        setSeatNo((prev) => prev + row.availableSeat);
+      let totalAvailableSeats = 0; // Accumulator for available seats
+      const updatedSeats = seat.map((house) => {
+        const updatedHouse = { ...house }; // Create a shallow copy to avoid direct mutation
+        updatedHouse.seatInfo = house.seatInfo.map((row) => {
+          let availableSeatCount = 0; // Counter for available seats in the current row
+          const updatedRow = { ...row, column: [...row.column] }; // Shallow copy of row and column
+          updatedRow.column.forEach((seatTemp) => {
+            if (isSeatAvailable(seatTemp)) {
+              availableSeatCount++;
+            }
+          });
+          updatedRow.availableSeat = availableSeatCount; // Update availableSeat for the row
+          totalAvailableSeats += availableSeatCount; // Add to total available seats
+          return updatedRow;
         });
+        return updatedHouse;
       });
+      console.log("setSeatNo");
+      setSeatNo(totalAvailableSeats); // Update state once with the total count
+      // If you need to update the seat state with the modified structure, do it here
     }
-  }, [seat]);
+  }, [seat, setSeat]);
 
   useEffect(() => {
     getAllEventApi().then((response) => {
@@ -65,7 +79,6 @@ function App() {
 
   useEffect(() => {
     if (guestData) {
-      console.log(guestData);
       const remainingGuests = guestData.filter((guest) => !guest.checked);
       setGuestOptions(remainingGuests);
     }
@@ -95,7 +108,6 @@ function App() {
       }
     });
   };
-
 
   const searchGuestList = (ig, tel) => {
     return (
@@ -130,6 +142,13 @@ function App() {
       guestData: updatedGuestData,
     };
     updateEventApi(eventId, request);
+    console.log("setSeat");
+    getEventDataApi(eventId).then((response) => {
+      if (response) {
+        setGuestData(JSON.parse(response));
+        getSeatByEventId();
+      }
+    });
   };
 
   const assignSeats = (seatingPlan, selectedValues, participants) => {
@@ -161,7 +180,7 @@ function App() {
     } else {
       const selectedHouse = seatingPlan[bestPlanScore.index];
       const selectedSeatingPlan = selectedHouse.seatInfo;
-      const selectedRow = selectedSeatingPlan[bestPlanScore.rowIndex];  
+      const selectedRow = selectedSeatingPlan[bestPlanScore.rowIndex];
       const selectedHouseName = selectedHouse.houseDisplay;
       markSeatsFromTo(
         selectedRow.column,
@@ -419,6 +438,7 @@ function App() {
             eventName={eventName}
             eventHouse={eventHouse}
             guest={guestData}
+            setSeat={setSeat}
           />
         </Grid>
 

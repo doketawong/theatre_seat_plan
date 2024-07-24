@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, Tab, Box, Grid } from "@mui/material";
 import SeatingPlan from "./SeatingPlan"; // Assuming this is your seating plan component
-import {
-  updateEventApi,
-} from "../util/api";
+import { updateEventApi } from "../util/api";
 
 const SeatingPlanTab = ({
   seatingData,
@@ -11,9 +9,12 @@ const SeatingPlanTab = ({
   eventName,
   eventHouse,
   guest,
+  setSeat,
 }) => {
   const [value, setValue] = useState(0);
-  const [seatingState, setSeatingState] = useState(seatingData);
+
+  useEffect(() => {
+  }, [seatingData]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -26,13 +27,14 @@ const SeatingPlanTab = ({
       }
       return seat;
     });
-    setSeatingState(updatedSeatingData);
 
     const request = {
       seatingPlan: updatedSeatingData,
       guestData: updatedGuestData,
     };
     updateEventApi(eventId, request);
+    console.log('setSeat', updatedSeatingData);
+    setSeat(updatedSeatingData);
   };
 
   function TabPanel(props) {
@@ -81,7 +83,6 @@ const SeatingPlanTab = ({
               onUpdateSeatInfo={(newSeatInfo, updatedGuestData) =>
                 updateSeatInfo(index, newSeatInfo, updatedGuestData)
               }
-              index={index}
             />
           </TabPanel>
         ))}

@@ -12,7 +12,7 @@ import {
   TextField,
   Autocomplete,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const SeatingPlan = ({
   seat,
@@ -20,13 +20,15 @@ const SeatingPlan = ({
   eventHouse,
   guest,
   onUpdateSeatInfo,
-  index,
 }) => {
   const [open, setOpen] = useState(false);
   const [selectedCol, setSelectedCol] = useState({});
   const [selectedSeat, setSelectedSeat] = useState({});
   const [selectedGuest, setSelectedGuest] = useState([]);
   const [selectedReserved, setSelectedReserved] = useState("");
+
+  useEffect(() => {
+  }, [seat]);
 
   const handleClick = (event) => {
     setSelectedCol({
