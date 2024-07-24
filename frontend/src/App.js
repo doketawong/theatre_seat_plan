@@ -142,7 +142,6 @@ function App() {
       guestData: updatedGuestData,
     };
     updateEventApi(eventId, request);
-    console.log("setSeat");
     getEventDataApi(eventId).then((response) => {
       if (response) {
         setGuestData(JSON.parse(response));

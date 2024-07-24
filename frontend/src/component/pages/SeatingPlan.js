@@ -27,8 +27,7 @@ const SeatingPlan = ({
   const [selectedGuest, setSelectedGuest] = useState([]);
   const [selectedReserved, setSelectedReserved] = useState("");
 
-  useEffect(() => {
-  }, [seat]);
+  useEffect(() => {}, [seat]);
 
   const handleClick = (event) => {
     setSelectedCol({
@@ -58,7 +57,10 @@ const SeatingPlan = ({
       const updatedColumn = temp.column.map((col) => {
         if (col.id === selectedCol.id && col.column === selectedCol.column) {
           // Simplify the logic by directly setting the properties based on conditions
-          let guestNum = parseInt(selectedGuest.guest_num, 10); // Convert guest_num to integer
+          let guestNum = 0;
+          if (selectedGuest) {
+            guestNum = parseInt(selectedGuest.guest_num, 10); // Convert guest_num to integer
+          }
           if (selectedCol.marked && guestNum > 0) {
             col.display = selectedGuest.ig;
             col.marked = true;

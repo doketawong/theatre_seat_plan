@@ -568,6 +568,148 @@
         "availableSeat": 15
     },
     {
+        "row": "E",
+        "column": [
+            {
+                "id": 1,
+                "column": 1,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 2,
+                "column": 2,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 3,
+                "column": 3,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 4,
+                "column": 4,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 5,
+                "column": 5,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": true
+            },
+            {
+                "id": 6,
+                "column": 6,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 7,
+                "column": 7,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 8,
+                "column": 8,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 9,
+                "column": 9,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 10,
+                "column": 10,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 11,
+                "column": 11,
+                "display": "",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 12,
+                "column": 12,
+                "display": "12",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 13,
+                "column": 13,
+                "display": "13",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 14,
+                "column": 14,
+                "display": "14",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 15,
+                "column": 15,
+                "display": "15",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 16,
+                "column": 16,
+                "display": "16",
+                "marked": false,
+                "reserved": false,
+                "disabled": false
+            },
+            {
+                "id": 17,
+                "column": 17,
+                "display": "17",
+                "marked": false,
+                "reserved": false,
+                "disabled": true
+            }
+        ],
+        "availableSeat": 15
+    },
+    {
         "row": "D",
         "column": [
             {
