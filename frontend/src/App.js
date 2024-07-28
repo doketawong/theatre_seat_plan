@@ -65,7 +65,6 @@ function App() {
         });
         return updatedHouse;
       });
-      console.log("setSeatNo");
       setSeatNo(totalAvailableSeats); // Update state once with the total count
       // If you need to update the seat state with the modified structure, do it here
     }
@@ -105,6 +104,7 @@ function App() {
           seatingPlan = JSON.parse(response.seating_plan);
         }
         setSeat(seatingPlan);
+        console.log(seatingPlan);
       }
     });
   };
