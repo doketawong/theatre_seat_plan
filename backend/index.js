@@ -257,6 +257,55 @@ app.post("/updateEvent/:eventId", cors(), async (req, res) => {
   }
 });
 
+
+// New route to generate a 2D array
+app.post('/generateTheatrePlan', (req, res) => {
+  const { rows, columns } = req.body;
+
+  // Validate input
+  if (!rows || !columns || isNaN(rows) || isNaN(columns)) {
+    return res.status(400).json({ error: 'Invalid input parameters' });
+  }
+
+  const numRows = parseInt(rows);
+  const numCols = parseInt(columns);
+
+  // Generate 2D array
+  const array2D = Array.from({ length: numRows }, () => 
+    Array.from({ length: numCols }, () => Math.floor(Math.random() * 100))
+  );
+
+  res.json({ array2D });
+});
+
+app.post('/generate2DArray', (req, res) => {
+  const { rows, columns } = req.body;
+
+  // Validate input
+  if (!rows || !columns || isNaN(rows) || isNaN(columns)) {
+    return res.status(400).json({ error: 'Invalid input parameters' });
+  }
+
+  const numRows = parseInt(rows);
+  const numCols = parseInt(columns);
+
+  // Generate 2D array
+  const array2D = Array.from({ length: numRows }, (_, rowIndex) => ({
+    row: String.fromCharCode(65 + (numRows - 1 - rowIndex)),
+    availableSeat: numCols,
+    column: Array.from({ length: numCols }, (_, colIndex) => ({
+      id: colIndex + 1,
+      column: colIndex + 1,
+      display: "",
+      marked: false,
+      reserved: false,
+      disabled: false
+    }))
+  }));
+
+  res.json({ array2D });
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
