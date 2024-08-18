@@ -106,7 +106,10 @@ app.get("/getHouse/:houseId", cors(), async (req, res) => {
 app.get("/getHousesByIds/ids", cors(), async (req, res) => {
   try {
     // Step 2: Accept 'ids' as a query parameter and split it into an array
-    const ids = req.query.ids.split(',').map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+    const ids = req.query.ids
+      .split(",")
+      .map((id) => parseInt(id, 10))
+      .filter((id) => !isNaN(id));
 
     // Check if ids array is not empty
     if (ids.length === 0) {
@@ -144,7 +147,9 @@ app.get("/getHouse", cors(), async (req, res) => {
 app.get("/getEvent", cors(), async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query("SELECT event_id, event_name FROM event order by event_id desc");
+    const result = await client.query(
+      "SELECT event_id, event_name FROM event order by event_id desc"
+    );
     const results = { results: result ? result.rows : null };
     res.json(results);
     client.release();
@@ -257,33 +262,32 @@ app.post("/updateEvent/:eventId", cors(), async (req, res) => {
   }
 });
 
-
 // New route to generate a 2D array
-app.post('/generateTheatrePlan', (req, res) => {
+app.post("/generateTheatrePlan", (req, res) => {
   const { rows, columns } = req.body;
 
   // Validate input
   if (!rows || !columns || isNaN(rows) || isNaN(columns)) {
-    return res.status(400).json({ error: 'Invalid input parameters' });
+    return res.status(400).json({ error: "Invalid input parameters" });
   }
 
   const numRows = parseInt(rows);
   const numCols = parseInt(columns);
 
   // Generate 2D array
-  const array2D = Array.from({ length: numRows }, () => 
+  const array2D = Array.from({ length: numRows }, () =>
     Array.from({ length: numCols }, () => Math.floor(Math.random() * 100))
   );
 
   res.json({ array2D });
 });
 
-app.post('/generate2DArray', (req, res) => {
+app.post("/generate2DArray", (req, res) => {
   const { rows, columns } = req.body;
 
   // Validate input
   if (!rows || !columns || isNaN(rows) || isNaN(columns)) {
-    return res.status(400).json({ error: 'Invalid input parameters' });
+    return res.status(400).json({ error: "Invalid input parameters" });
   }
 
   const numRows = parseInt(rows);
@@ -294,13 +298,14 @@ app.post('/generate2DArray', (req, res) => {
     row: String.fromCharCode(65 + (numRows - 1 - rowIndex)),
     availableSeat: numCols,
     column: Array.from({ length: numCols }, (_, colIndex) => ({
-      id: colIndex + 1,
-      column: colIndex + 1,
+      id: numCols-colIndex,
+      column: numCols-colIndex,
       display: "",
       marked: false,
       reserved: false,
-      disabled: false
-    }))
+      disabled: false,
+      rate: 5,
+    })),
   }));
 
   res.json({ array2D });

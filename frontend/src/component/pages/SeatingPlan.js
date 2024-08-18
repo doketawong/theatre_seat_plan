@@ -80,14 +80,18 @@ const SeatingPlan = ({
           } else if (selectedCol.reserved) {
             col.display = selectedReserved;
             col.reserved = true;
-          } else if (!selectedCol.marked) {
-            selectedGuest.guest_num = (guestNum + 1).toString();
-            selectedGuest.checked = false;
+          } else if (!selectedCol.marked ) {
+            if (selectedGuest) {
+              selectedGuest.guest_num = (guestNum + 1).toString();
+              selectedGuest.checked = false;
+            }
             temp.availableSeat++;
             col.display = "";
             col.marked = false;
             col.reserved = false;
-          } else {
+          } else if (selectedCol.disabled) {
+            col.disabled = true;
+          }else {
             col.display = "";
             col.marked = false;
             col.reserved = false;
