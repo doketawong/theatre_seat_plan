@@ -36,6 +36,13 @@ const SeatingPlan = ({
     });
   };
 
+  const handleRatingChange = (event) => {
+    setSelectedCol({
+      ...selectedCol,
+      rate: event.target.value,
+    });
+  };
+
   const handleClickOpen = (col, row) => {
     const seat = row.row + col.column;
     setSelectedCol(col);
@@ -56,16 +63,15 @@ const SeatingPlan = ({
     const updatedSeats = seat.map((temp) => {
       const updatedColumn = temp.column.map((col) => {
         if (col.id === selectedCol.id && col.column === selectedCol.column) {
-          // Simplify the logic by directly setting the properties based on conditions
-          let guestNum = 0;
-          if (selectedGuest) {
-            guestNum = parseInt(selectedGuest.guest_num, 10); // Convert guest_num to integer
-          }
+          let guestNum = selectedGuest
+            ? parseInt(selectedGuest.guest_num, 10)
+            : 0;
+
           if (selectedCol.marked && guestNum > 0) {
             col.display = selectedGuest.ig;
             col.marked = true;
 
-            selectedGuest.guest_num = (guestNum - 1).toString(); // Decrement guest_num and convert back to string if necessary
+            selectedGuest.guest_num = (guestNum - 1).toString();
             temp.availableSeat--;
             if (selectedGuest.guest_num === "0") {
               selectedGuest.checked = true;
@@ -73,30 +79,30 @@ const SeatingPlan = ({
 
             const guestIndex = guest.findIndex(
               (temp) => temp.id === selectedGuest.id
-            ); // Assuming each guest has a unique 'id' for comparison
+            );
             if (guestIndex !== -1) {
-              guest[guestIndex] = { ...guest[guestIndex], ...selectedGuest }; // Update the guest in the list with the properties of selectGuest
+              guest[guestIndex] = { ...guest[guestIndex], ...selectedGuest };
             }
           } else if (selectedCol.reserved) {
-            col.display = selectedReserved;
+            col.display = "";
             col.reserved = true;
-          } else if (!selectedCol.marked ) {
-            if (selectedGuest) {
+          } else if (selectedCol.disabled) {
+            col.display = "";
+            col.disabled = true;
+          } else {
+            if (selectedCol.marked) {
               selectedGuest.guest_num = (guestNum + 1).toString();
               selectedGuest.checked = false;
+              temp.availableSeat++;
             }
-            temp.availableSeat++;
             col.display = "";
             col.marked = false;
-            col.reserved = false;
-          } else if (selectedCol.disabled) {
-            col.disabled = true;
-          }else {
-            col.display = "";
-            col.marked = false;
+            col.disabled = false;
             col.reserved = false;
           }
         }
+
+        col.rate = selectedCol.rate;
 
         return col;
       });
@@ -300,6 +306,16 @@ const SeatingPlan = ({
                 />
               }
               label="Reserved"
+            />
+            <TextField
+              label="Rating"
+              type="number"
+              value={selectedCol.rate || ""}
+              onChange={(e) => handleRatingChange(e)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              variant="outlined"
             />
             <Button
               variant="contained"

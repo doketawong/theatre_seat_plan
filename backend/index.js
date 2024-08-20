@@ -298,8 +298,8 @@ app.post("/generate2DArray", (req, res) => {
     row: String.fromCharCode(65 + (numRows - 1 - rowIndex)),
     availableSeat: numCols,
     column: Array.from({ length: numCols }, (_, colIndex) => ({
-      id: numCols-colIndex,
-      column: numCols-colIndex,
+      id: numCols - colIndex,
+      column: numCols - colIndex,
       display: "",
       marked: false,
       reserved: false,

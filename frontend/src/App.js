@@ -1,5 +1,5 @@
 import { BrowserRouter as Router } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import {
   getSeatByEventIdApi,
   getEventDataApi,
@@ -48,23 +48,22 @@ function App() {
   };
   useEffect(() => {
     if (seat) {
-      let totalAvailableSeats = 0; // Accumulator for available seats
-      const updatedSeats = seat.map((house) => {
-        const updatedHouse = { ...house }; // Create a shallow copy to avoid direct mutation
-        updatedHouse.seatInfo = house.seatInfo.map((row) => {
-          let availableSeatCount = 0; // Counter for available seats in the current row
-          const updatedRow = { ...row, column: [...row.column] }; // Shallow copy of row and column
-          updatedRow.column.forEach((seatTemp) => {
-            if (isSeatAvailable(seatTemp)) {
-              availableSeatCount++;
-            }
+      const { updatedSeats, totalAvailableSeats } = seat.reduce(
+        (acc, house) => {
+          const updatedHouse = { ...house }; // Create a shallow copy to avoid direct mutation
+          updatedHouse.seatInfo = house.seatInfo.map((row) => {
+            const availableSeatCount = row.column.reduce((count, seatTemp) => {
+              return count + (isSeatAvailable(seatTemp) ? 1 : 0);
+            }, 0);
+            return { ...row, availableSeat: availableSeatCount }; // Shallow copy of row with updated availableSeat
           });
-          updatedRow.availableSeat = availableSeatCount; // Update availableSeat for the row
-          totalAvailableSeats += availableSeatCount; // Add to total available seats
-          return updatedRow;
-        });
-        return updatedHouse;
-      });
+          acc.totalAvailableSeats += updatedHouse.seatInfo.reduce((sum, row) => sum + row.availableSeat, 0);
+          acc.updatedSeats.push(updatedHouse);
+          return acc;
+        },
+        { updatedSeats: [], totalAvailableSeats: 0 }
+      );
+
       setSeatNo(totalAvailableSeats); // Update state once with the total count
       // If you need to update the seat state with the modified structure, do it here
     }
@@ -76,45 +75,53 @@ function App() {
     });
   }, []);
 
-  useEffect(() => {
+  const remainingGuests = useMemo(() => {
     if (guestData) {
-      const remainingGuests = guestData.filter((guest) => !guest.checked);
-      setGuestOptions(remainingGuests);
+      return guestData.filter((guest) => !guest.checked);
     }
+    return [];
   }, [guestData]);
 
   useEffect(() => {
+    setGuestOptions(remainingGuests);
+  }, [remainingGuests]);
+
+  const guestMemo = useMemo(() => {
     if (guestOptions) {
-      setGuestNo(guestOptions.length);
+      return guestOptions.length;
     }
+    return 0;
   }, [guestOptions]);
 
-  const getSeatByEventId = () => {
-    getSeatByEventIdApi(eventId).then((response) => {
+  useEffect(() => {
+    setGuestNo(guestMemo);
+  }, [guestMemo]);
+
+  const getSeatByEventId = async () => {
+    try {
+      const response = await getSeatByEventIdApi(eventId);
       if (response) {
         setEventName(response.event_name);
         setEventHouse(response.display_name);
+  
+        let updatedSeatingPlan = seatingPlan;
+  
         if (response.seating_plan == null) {
           const request = {
             seatingPlan: seatingPlan,
             guestData: guestData,
           };
-          updateEventApi(eventId, request);
+          await updateEventApi(eventId, request);
         } else {
-          seatingPlan = JSON.parse(response.seating_plan);
+          updatedSeatingPlan = JSON.parse(response.seating_plan);
         }
-        setSeat(seatingPlan);
-        console.log(seatingPlan);
+  
+        setSeat(updatedSeatingPlan);
       }
-    });
-  };
-
-  const searchGuestList = (ig, tel) => {
-    return (
-      searchValue &&
-      (ig.toLowerCase().includes(searchValue.toLowerCase()) ||
-        tel.includes(searchValue))
-    );
+    } catch (error) {
+      console.error('Error fetching seat by event ID:', error);
+      // Handle error appropriately, e.g., show a notification to the user
+    }
   };
 
   const handleAssign = () => {
