@@ -23,6 +23,7 @@ const SeatingPlan = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [selectedCol, setSelectedCol] = useState({});
+  const [selectedRow, setSelectedRow] = useState({});
   const [selectedSeat, setSelectedSeat] = useState({});
   const [selectedGuest, setSelectedGuest] = useState([]);
   const [selectedReserved, setSelectedReserved] = useState("");
@@ -46,6 +47,7 @@ const SeatingPlan = ({
   const handleClickOpen = (col, row) => {
     const seat = row.row + col.column;
     setSelectedCol(col);
+    setSelectedRow(row);
     setSelectedSeat(seat);
     setSelectedGuest(guest.find((g) => g.ig === col.display));
     setOpen(true);
@@ -59,10 +61,34 @@ const SeatingPlan = ({
     setSelectedReserved(event.target.value);
   };
 
+  const getBackgroundColor = (col) => {
+    if (col.marked) {
+      return "#00FF00";
+    } else if (col.reserved) {
+      return "#e8ed4e";
+    } else if (col.disabled) {
+      return "#FF0000";
+    } else if (col.rate === "4") {
+      return "#D899FF";
+    } else if (col.rate === "3") {
+      return "#59e1f0";
+    }else if (col.rate === "2") {
+      return "#07752c";
+    }else if (col.rate === "1") {
+      return "#ffae00";
+    }else {
+      return "#CBCBCB";
+    }
+  };
+
   const updateSeatingPlan = () => {
     const updatedSeats = seat.map((temp) => {
       const updatedColumn = temp.column.map((col) => {
-        if (col.id === selectedCol.id && col.column === selectedCol.column) {
+        if (
+          col.id === selectedCol.id &&
+          col.column === selectedCol.column &&
+          temp.row === selectedRow.row
+        ) {
           let guestNum = selectedGuest
             ? parseInt(selectedGuest.guest_num, 10)
             : 0;
@@ -100,9 +126,8 @@ const SeatingPlan = ({
             col.disabled = false;
             col.reserved = false;
           }
+          col.rate = selectedCol.rate;
         }
-
-        col.rate = selectedCol.rate;
 
         return col;
       });
@@ -170,11 +195,7 @@ const SeatingPlan = ({
                             justifyContent: "center",
                             alignItems: "center",
                             flexDirection: "column",
-                            backgroundColor: col.marked
-                              ? "#00FF00"
-                              : col.reserved
-                              ? "#D899FF"
-                              : "#CBCBCB",
+                            backgroundColor: getBackgroundColor(col),
                           }}
                         >
                           <div
@@ -204,6 +225,12 @@ const SeatingPlan = ({
                               style={{ whiteSpace: "nowrap" }}
                             >
                               {col.display}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              style={{ whiteSpace: "nowrap" }}
+                            >
+                              {col.rate}
                             </Typography>
                           </div>
                         </Button>

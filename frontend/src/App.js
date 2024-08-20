@@ -1,5 +1,5 @@
 import { BrowserRouter as Router } from "react-router-dom";
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   getSeatByEventIdApi,
   getEventDataApi,
@@ -48,22 +48,23 @@ function App() {
   };
   useEffect(() => {
     if (seat) {
-      const { updatedSeats, totalAvailableSeats } = seat.reduce(
-        (acc, house) => {
-          const updatedHouse = { ...house }; // Create a shallow copy to avoid direct mutation
-          updatedHouse.seatInfo = house.seatInfo.map((row) => {
-            const availableSeatCount = row.column.reduce((count, seatTemp) => {
-              return count + (isSeatAvailable(seatTemp) ? 1 : 0);
-            }, 0);
-            return { ...row, availableSeat: availableSeatCount }; // Shallow copy of row with updated availableSeat
+      let totalAvailableSeats = 0; // Accumulator for available seats
+      const updatedSeats = seat.map((house) => {
+        const updatedHouse = { ...house }; // Create a shallow copy to avoid direct mutation
+        updatedHouse.seatInfo = house.seatInfo.map((row) => {
+          let availableSeatCount = 0; // Counter for available seats in the current row
+          const updatedRow = { ...row, column: [...row.column] }; // Shallow copy of row and column
+          updatedRow.column.forEach((seatTemp) => {
+            if (isSeatAvailable(seatTemp)) {
+              availableSeatCount++;
+            }
           });
-          acc.totalAvailableSeats += updatedHouse.seatInfo.reduce((sum, row) => sum + row.availableSeat, 0);
-          acc.updatedSeats.push(updatedHouse);
-          return acc;
-        },
-        { updatedSeats: [], totalAvailableSeats: 0 }
-      );
-
+          updatedRow.availableSeat = availableSeatCount; // Update availableSeat for the row
+          totalAvailableSeats += availableSeatCount; // Add to total available seats
+          return updatedRow;
+        });
+        return updatedHouse;
+      });
       setSeatNo(totalAvailableSeats); // Update state once with the total count
       // If you need to update the seat state with the modified structure, do it here
     }
@@ -75,53 +76,45 @@ function App() {
     });
   }, []);
 
-  const remainingGuests = useMemo(() => {
+  useEffect(() => {
     if (guestData) {
-      return guestData.filter((guest) => !guest.checked);
+      const remainingGuests = guestData.filter((guest) => !guest.checked);
+      setGuestOptions(remainingGuests);
     }
-    return [];
   }, [guestData]);
 
   useEffect(() => {
-    setGuestOptions(remainingGuests);
-  }, [remainingGuests]);
-
-  const guestMemo = useMemo(() => {
     if (guestOptions) {
-      return guestOptions.length;
+      setGuestNo(guestOptions.length);
     }
-    return 0;
   }, [guestOptions]);
 
-  useEffect(() => {
-    setGuestNo(guestMemo);
-  }, [guestMemo]);
-
-  const getSeatByEventId = async () => {
-    try {
-      const response = await getSeatByEventIdApi(eventId);
+  const getSeatByEventId = () => {
+    getSeatByEventIdApi(eventId).then((response) => {
       if (response) {
         setEventName(response.event_name);
         setEventHouse(response.display_name);
-  
-        let updatedSeatingPlan = seatingPlan;
-  
         if (response.seating_plan == null) {
           const request = {
             seatingPlan: seatingPlan,
             guestData: guestData,
           };
-          await updateEventApi(eventId, request);
+          updateEventApi(eventId, request);
         } else {
-          updatedSeatingPlan = JSON.parse(response.seating_plan);
+          seatingPlan = JSON.parse(response.seating_plan);
         }
-  
-        setSeat(updatedSeatingPlan);
+        setSeat(seatingPlan);
+        console.log(seatingPlan);
       }
-    } catch (error) {
-      console.error('Error fetching seat by event ID:', error);
-      // Handle error appropriately, e.g., show a notification to the user
-    }
+    });
+  };
+
+  const searchGuestList = (ig, tel) => {
+    return (
+      searchValue &&
+      (ig.toLowerCase().includes(searchValue.toLowerCase()) ||
+        tel.includes(searchValue))
+    );
   };
 
   const handleAssign = () => {
@@ -158,7 +151,7 @@ function App() {
   };
 
   const assignSeats = (seatingPlan, selectedValues, participants) => {
-    let bestPlanScore = { bestScore: 0, bestPosition: null, index: 0 };
+    let bestPlanScore = { bestScore: 0, bestPosition: null, index: 0, bestRateScore: 0 };
     seatingPlan.forEach((plan, index) => {
       let bestSeat = null;
       const houseRow = plan.seatInfo;
@@ -171,7 +164,7 @@ function App() {
           bestPlanScore.bestScore,
           houseRow.length
         );
-        if (bestSeat && bestSeat.bestScore >= bestPlanScore.bestScore) {
+        if (bestSeat && (bestSeat.bestRateScore > bestPlanScore.bestRateScore || bestSeat.bestScore >= bestPlanScore.bestScore )) {
           bestPlanScore = bestSeat;
         }
       }
@@ -209,6 +202,7 @@ function App() {
     houseRowLength
   ) => {
     let bestPosition = null;
+    let bestRateScore = 0;
 
     let seatsAvailable = 0;
     for (let col = 0; col < row.column.length; col++) {
@@ -216,10 +210,18 @@ function App() {
         seatsAvailable++;
         if (seatsAvailable === participants) {
           let score = houseRowLength - rowIndex;
-          if (score >= bestScore) {
+          let rateScore = 0;
+
+          // Calculate the sum of rates for the seats in the range
+          for (let i = col - participants + 1; i <= col; i++) {
+            rateScore += row.column[i].rate;
+          }
+
+          if (rateScore > bestRateScore || (rateScore === bestRateScore && score >= bestScore)) {
+            bestRateScore = rateScore;
             bestScore = score;
             bestPosition = { start: col - participants + 1, end: col };
-            return { bestScore, bestPosition, index, rowIndex };
+            return { bestScore, bestPosition, index, rowIndex, bestRateScore };
           }
         }
       } else {
