@@ -66,6 +66,7 @@ function App() {
         return updatedHouse;
       });
       setSeatNo(totalAvailableSeats); // Update state once with the total count
+      setSeat(updatedSeats);
       // If you need to update the seat state with the modified structure, do it here
     }
   }, [seat, setSeat]);
@@ -77,16 +78,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (guestData) {
-      const remainingGuests = guestData.filter((guest) => !guest.checked);
-      setGuestOptions(remainingGuests);
-    }
+    const remainingGuests = guestData.filter((guest) => !guest.checked);
+    setGuestOptions(remainingGuests);
   }, [guestData]);
 
   useEffect(() => {
-    if (guestOptions) {
       setGuestNo(guestOptions.length);
-    }
   }, [guestOptions]);
 
   const getSeatByEventId = () => {
@@ -134,8 +131,8 @@ function App() {
       return isSelected ? { ...guest, checked: true, guest_num: "0" } : guest;
     });
 
-    setSelectedValues([]);
     setGuestData(updatedGuestData);
+    setSelectedValues([]);
 
     const request = {
       seatingPlan: seatingPlan,
@@ -144,14 +141,18 @@ function App() {
     updateEventApi(eventId, request);
     getEventDataApi(eventId).then((response) => {
       if (response) {
-        setGuestData(JSON.parse(response));
         getSeatByEventId();
       }
     });
   };
 
   const assignSeats = (seatingPlan, selectedValues, participants) => {
-    let bestPlanScore = { bestScore: 0, bestPosition: null, index: 0, bestRateScore: 0 };
+    let bestPlanScore = {
+      bestScore: 0,
+      bestPosition: null,
+      index: 0,
+      bestRateScore: 0,
+    };
     seatingPlan.forEach((plan, index) => {
       let bestSeat = null;
       const houseRow = plan.seatInfo;
@@ -164,7 +165,11 @@ function App() {
           bestPlanScore.bestScore,
           houseRow.length
         );
-        if (bestSeat && (bestSeat.bestRateScore > bestPlanScore.bestRateScore || bestSeat.bestScore >= bestPlanScore.bestScore )) {
+        if (
+          bestSeat &&
+          (bestSeat.bestRateScore > bestPlanScore.bestRateScore ||
+            bestSeat.bestScore >= bestPlanScore.bestScore)
+        ) {
           bestPlanScore = bestSeat;
         }
       }
@@ -217,7 +222,10 @@ function App() {
             rateScore += row.column[i].rate;
           }
 
-          if (rateScore > bestRateScore || (rateScore === bestRateScore && score >= bestScore)) {
+          if (
+            rateScore > bestRateScore ||
+            (rateScore === bestRateScore && score >= bestScore)
+          ) {
             bestRateScore = rateScore;
             bestScore = score;
             bestPosition = { start: col - participants + 1, end: col };
