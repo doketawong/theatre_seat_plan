@@ -66,10 +66,10 @@ function App() {
         return updatedHouse;
       });
       setSeatNo(totalAvailableSeats); // Update state once with the total count
-      setSeat(updatedSeats);
       // If you need to update the seat state with the modified structure, do it here
     }
-  }, [seat, setSeat]);
+    
+  }, [seat]);
 
   useEffect(() => {
     getAllEventApi().then((response) => {
@@ -83,7 +83,7 @@ function App() {
   }, [guestData]);
 
   useEffect(() => {
-      setGuestNo(guestOptions.length);
+    setGuestNo(guestOptions.length);
   }, [guestOptions]);
 
   const getSeatByEventId = () => {
@@ -101,7 +101,6 @@ function App() {
           seatingPlan = JSON.parse(response.seating_plan);
         }
         setSeat(seatingPlan);
-        console.log(seatingPlan);
       }
     });
   };
