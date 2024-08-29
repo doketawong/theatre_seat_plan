@@ -68,7 +68,6 @@ function App() {
       setSeatNo(totalAvailableSeats); // Update state once with the total count
       // If you need to update the seat state with the modified structure, do it here
     }
-    
   }, [seat]);
 
   useEffect(() => {
@@ -119,7 +118,7 @@ function App() {
       0
     );
     setAssignedSeats([]);
-    let seatingPlan = assignSeats(seat, selectedValues, totalGuestNum, 0, 0);
+    let seatingPlan = assignSeats(seat, selectedValues, totalGuestNum);
 
     setIsPopupVisible(true); // Show the popup
 
@@ -147,10 +146,10 @@ function App() {
 
   const assignSeats = (seatingPlan, selectedValues, participants) => {
     let bestPlanScore = {
-      bestScore: 0,
+      bestScore: -1,
       bestPosition: null,
       index: 0,
-      bestRateScore: 0,
+      bestRateScore: 4,
     };
     seatingPlan.forEach((plan, index) => {
       let bestSeat = null;
@@ -218,9 +217,8 @@ function App() {
 
           // Calculate the sum of rates for the seats in the range
           for (let i = col - participants + 1; i <= col; i++) {
-            rateScore += row.column[i].rate;
+            rateScore += parseInt(row.column[i].rate);
           }
-
           if (
             rateScore > bestRateScore ||
             (rateScore === bestRateScore && score >= bestScore)
@@ -228,14 +226,13 @@ function App() {
             bestRateScore = rateScore;
             bestScore = score;
             bestPosition = { start: col - participants + 1, end: col };
-            return { bestScore, bestPosition, index, rowIndex, bestRateScore };
           }
         }
       } else {
         seatsAvailable = 0; // Reset if a seat is not suitable
       }
     }
-    return null;
+    return { bestScore, bestPosition, index, rowIndex, bestRateScore };
   };
 
   const distributeParticipantsAcrossSeats = (
