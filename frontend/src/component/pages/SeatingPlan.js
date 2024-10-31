@@ -28,8 +28,6 @@ const SeatingPlan = ({
   const [selectedGuest, setSelectedGuest] = useState([]);
   const [selectedReserved, setSelectedReserved] = useState("");
 
-  useEffect(() => {}, [seat]);
-
   const handleClick = (event) => {
     setSelectedCol({
       ...selectedCol,
@@ -68,15 +66,7 @@ const SeatingPlan = ({
       return "#e8ed4e";
     } else if (col.disabled) {
       return "#FF0000";
-    } else if (col.rate === "4") {
-      return "#D899FF";
-    } else if (col.rate === "3") {
-      return "#59e1f0";
-    }else if (col.rate === "2") {
-      return "#07752c";
-    }else if (col.rate === "1") {
-      return "#ffae00";
-    }else {
+    } else {
       return "#CBCBCB";
     }
   };
@@ -116,9 +106,13 @@ const SeatingPlan = ({
             col.display = "";
             col.disabled = true;
           } else {
-            if (selectedCol.marked) {
-              selectedGuest.guest_num = (guestNum + 1).toString();
-              selectedGuest.checked = false;
+            if (col.display) {
+
+              const guestIndex = guest.findIndex(
+                (temp) => temp.ig === col.display
+              );
+              guest[guestIndex].guest_num = (guestNum + 1).toString();
+              guest[guestIndex].checked = false;
               temp.availableSeat++;
             }
             col.display = "";

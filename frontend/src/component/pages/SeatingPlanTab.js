@@ -9,12 +9,9 @@ const SeatingPlanTab = ({
   eventName,
   eventHouse,
   guest,
-  setSeat,
+  setSeat
 }) => {
   const [value, setValue] = useState(0);
-
-  useEffect(() => {
-  }, [seatingData]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -33,7 +30,6 @@ const SeatingPlanTab = ({
       guestData: updatedGuestData,
     };
     updateEventApi(eventId, request);
-    console.log('setSeat', updatedSeatingData);
     setSeat(updatedSeatingData);
   };
 

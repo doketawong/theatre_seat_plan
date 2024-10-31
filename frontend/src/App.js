@@ -78,6 +78,7 @@ function App() {
 
   useEffect(() => {
     const remainingGuests = guestData.filter((guest) => !guest.checked);
+    console.log("updated guest data", remainingGuests);
     setGuestOptions(remainingGuests);
   }, [guestData]);
 
@@ -166,7 +167,7 @@ function App() {
         if (
           bestSeat &&
           (bestSeat.bestRateScore > bestPlanScore.bestRateScore ||
-            bestSeat.bestScore >= bestPlanScore.bestScore)
+            bestSeat.bestScore > bestPlanScore.bestScore)
         ) {
           bestPlanScore = bestSeat;
         }
