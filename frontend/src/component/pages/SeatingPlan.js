@@ -102,9 +102,13 @@ const SeatingPlan = ({
           } else if (selectedCol.reserved) {
             col.display = "";
             col.reserved = true;
+            col.marked = false;
+            col.disabled = false;
           } else if (selectedCol.disabled) {
             col.display = "";
             col.disabled = true;
+            col.reserved = false;
+            col.marked = false;
           } else {
             if (col.display) {
 

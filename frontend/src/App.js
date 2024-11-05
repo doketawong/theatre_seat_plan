@@ -86,6 +86,21 @@ function App() {
     setGuestNo(guestOptions.length);
   }, [guestOptions]);
 
+  const calculateAvailableSeats = (seatingPlan) => {
+    seatingPlan.forEach((house) => {
+      house.seatInfo.forEach((row) => {
+        let availableSeatCount = 0;
+        row.column.forEach((seat) => {
+          if (isSeatAvailable(seat)) {
+            availableSeatCount++;
+          }
+        });
+        row.availableSeat = availableSeatCount;
+      });
+    });
+    return seatingPlan;
+  };
+
   const getSeatByEventId = () => {
     getSeatByEventIdApi(eventId).then((response) => {
       if (response) {
@@ -100,7 +115,8 @@ function App() {
         } else {
           seatingPlan = JSON.parse(response.seating_plan);
         }
-        setSeat(seatingPlan);
+        console.log(calculateAvailableSeats(seatingPlan));
+        setSeat(calculateAvailableSeats(seatingPlan));
       }
     });
   };
