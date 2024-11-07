@@ -7,8 +7,10 @@ import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
+import { Typography } from "@mui/material";
 
 const SeatAssignmentPopup = ({ seats, onClose, open }) => {
+  console.log(seats);
   return (
     <Dialog
       open={open}
@@ -25,6 +27,9 @@ const SeatAssignmentPopup = ({ seats, onClose, open }) => {
                   <>
                     <div>Assign Seat: {seat.seatNo}</div>
                     <div>{seat.house}</div>
+                    {index === 0 && (
+                      <div style={{ color: "red" }}>Extra: {seat.extra}</div>
+                    )}
                   </>
                 }
               />

@@ -121,14 +121,6 @@ function App() {
     });
   };
 
-  const searchGuestList = (ig, tel) => {
-    return (
-      searchValue &&
-      (ig.toLowerCase().includes(searchValue.toLowerCase()) ||
-        tel.includes(searchValue))
-    );
-  };
-
   const handleAssign = () => {
     const totalGuestNum = selectedValues.reduce(
       (acc, guest) => acc + parseInt(guest.guest_num, 10),
@@ -206,6 +198,7 @@ function App() {
         bestPlanScore.bestPosition.start,
         bestPlanScore.bestPosition.end,
         selectedValues[0].ig,
+        selectedValues[0].extra,
         selectedRow.row,
         selectedHouseName
       );
@@ -292,19 +285,20 @@ function App() {
     start,
     end,
     displayValue,
+    extra,
     row,
     selectedHouseName
   ) => {
     for (let i = start; i <= end; i++) {
-      markSeat(seats[i], displayValue, row, selectedHouseName);
+      markSeat(seats[i], displayValue, extra, row, selectedHouseName);
     }
   };
 
-  const markSeat = (seat, displayValue, row, house) => {
+  const markSeat = (seat, displayValue, extra,row, house) => {
     seat.marked = true;
     seat.display = displayValue;
     const seatNo = `${row}${seat.column}`;
-    setAssignedSeats((prev) => [...prev, { seatNo, house }]);
+    setAssignedSeats((prev) => [...prev, { seatNo, house, extra }]);
   };
 
   const handleSelectionChange = (event, newValue) => {
