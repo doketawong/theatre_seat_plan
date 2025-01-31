@@ -25,10 +25,19 @@ const SeatAssignmentPopup = ({ seats, onClose, open }) => {
               <ListItemText
                 primary={
                   <>
-                    <div>Assign Seat: {seat.seatNo}</div>
-                    <div>{seat.house}</div>
-                    {index === 0 && (
-                      <div style={{ color: "red" }}>Extra: {seat.extra}</div>
+                    <Typography variant="h4">
+                      Assign Seat:{" "}
+                      <Typography variant="h4 " sx={{ color: "#76b5c5" }}>
+                        {seat.seatNo}
+                      </Typography>
+                    </Typography>
+                    <Typography variant="h4" sx={{ color: "#76b5c5" }}>
+                      {seat.house}
+                    </Typography>
+                    {index === 0 && seat.extra !== "0" && seat.extra !== "" && (
+                      <Typography variant="h3" sx={{ color: "red" }}>
+                        Extra: {seat.extra}
+                      </Typography>
                     )}
                   </>
                 }

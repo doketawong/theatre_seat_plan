@@ -28,6 +28,8 @@ const SeatingPlan = ({
   const [selectedGuest, setSelectedGuest] = useState([]);
   const [selectedReserved, setSelectedReserved] = useState("");
 
+  useEffect(() => {}, [seat]);
+
   const handleClick = (event) => {
     setSelectedCol({
       ...selectedCol,
@@ -63,7 +65,7 @@ const SeatingPlan = ({
     if (col.marked) {
       return "#00FF00";
     } else if (col.reserved) {
-      return "#e8ed4e";
+      return "#CBCBCB";
     } else if (col.disabled) {
       return "#FF0000";
     } else {
@@ -100,23 +102,15 @@ const SeatingPlan = ({
               guest[guestIndex] = { ...guest[guestIndex], ...selectedGuest };
             }
           } else if (selectedCol.reserved) {
-            col.display = "";
+            col.display = selectedReserved;
             col.reserved = true;
-            col.marked = false;
-            col.disabled = false;
           } else if (selectedCol.disabled) {
             col.display = "";
             col.disabled = true;
-            col.reserved = false;
-            col.marked = false;
           } else {
-            if (col.display) {
-
-              const guestIndex = guest.findIndex(
-                (temp) => temp.ig === col.display
-              );
-              guest[guestIndex].guest_num = (guestNum + 1).toString();
-              guest[guestIndex].checked = false;
+            if (selectedCol.marked) {
+              selectedGuest.guest_num = (guestNum + 1).toString();
+              selectedGuest.checked = false;
               temp.availableSeat++;
             }
             col.display = "";
@@ -223,12 +217,6 @@ const SeatingPlan = ({
                               style={{ whiteSpace: "nowrap" }}
                             >
                               {col.display}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              style={{ whiteSpace: "nowrap" }}
-                            >
-                              {col.rate}
                             </Typography>
                           </div>
                         </Button>
