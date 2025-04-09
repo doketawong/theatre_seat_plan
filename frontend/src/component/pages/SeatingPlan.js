@@ -13,14 +13,16 @@ import {
   Autocomplete,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 
-const SeatingPlan = ({
-  seat,
-  eventName,
-  eventHouse,
-  guest,
-  onUpdateSeatInfo,
-}) => {
+const SeatingPlan = ({ index, onUpdateSeatInfo }) => {
+  const dispatch = useDispatch();
+
+  const { seats, guestData, eventName, eventHouse } = useSelector(
+    (state) => state.event
+  );
+
+  const seat = seats[index].seatInfo;
   const [open, setOpen] = useState(false);
   const [selectedCol, setSelectedCol] = useState({});
   const [selectedRow, setSelectedRow] = useState({});
@@ -28,7 +30,7 @@ const SeatingPlan = ({
   const [selectedGuest, setSelectedGuest] = useState([]);
   const [selectedReserved, setSelectedReserved] = useState("");
 
-  useEffect(() => {}, [seat]);
+  useEffect(() => {}, [seats]);
 
   const handleClick = (event) => {
     setSelectedCol({
@@ -49,7 +51,7 @@ const SeatingPlan = ({
     setSelectedCol(col);
     setSelectedRow(row);
     setSelectedSeat(seat);
-    setSelectedGuest(guest.find((g) => g.ig === col.display));
+    setSelectedGuest(guestData.find((g) => g.ig === col.display));
     setOpen(true);
   };
 
@@ -75,58 +77,63 @@ const SeatingPlan = ({
 
   const updateSeatingPlan = () => {
     const updatedSeats = seat.map((temp) => {
-      const updatedColumn = temp.column.map((col) => {
+      // Create a shallow copy of the temp object
+      const updatedTemp = { ...temp };
+  
+      // Update the column property
+      updatedTemp.column = temp.column.map((col) => {
         if (
           col.id === selectedCol.id &&
           col.column === selectedCol.column &&
           temp.row === selectedRow.row
         ) {
-          let guestNum = selectedGuest
-            ? parseInt(selectedGuest.guest_num, 10)
-            : 0;
-
+          let guestNum = selectedGuest ? parseInt(selectedGuest.guest_num, 10) : 0;
+  
           if (selectedCol.marked && guestNum > 0) {
-            col.display = selectedGuest.ig;
-            col.marked = true;
-
+            col = { ...col, display: selectedGuest.ig, marked: true };
             selectedGuest.guest_num = (guestNum - 1).toString();
-            temp.availableSeat--;
+            updatedTemp.availableSeat--;
             if (selectedGuest.guest_num === "0") {
               selectedGuest.checked = true;
             }
-
-            const guestIndex = guest.findIndex(
+  
+            const guestIndex = guestData.findIndex(
               (temp) => temp.id === selectedGuest.id
             );
             if (guestIndex !== -1) {
-              guest[guestIndex] = { ...guest[guestIndex], ...selectedGuest };
+              guestData[guestIndex] = {
+                ...guestData[guestIndex],
+                ...selectedGuest,
+              };
             }
           } else if (selectedCol.reserved) {
-            col.display = selectedReserved;
-            col.reserved = true;
+            col = { ...col, display: selectedReserved, reserved: true };
           } else if (selectedCol.disabled) {
-            col.display = "";
-            col.disabled = true;
+            col = { ...col, display: "", disabled: true };
           } else {
             if (selectedCol.marked) {
               selectedGuest.guest_num = (guestNum + 1).toString();
               selectedGuest.checked = false;
-              temp.availableSeat++;
+              updatedTemp.availableSeat++;
             }
-            col.display = "";
-            col.marked = false;
-            col.disabled = false;
-            col.reserved = false;
+            col = {
+              ...col,
+              display: "",
+              marked: false,
+              disabled: false,
+              reserved: false,
+            };
           }
           col.rate = selectedCol.rate;
         }
-
+  
         return col;
       });
-      temp.column = updatedColumn;
-      return temp;
+  
+      return updatedTemp; // Return the updated object
     });
-    onUpdateSeatInfo(updatedSeats, guest);
+  
+    onUpdateSeatInfo(updatedSeats, guestData);
     setOpen(false);
   };
 
@@ -240,7 +247,7 @@ const SeatingPlan = ({
                   <Autocomplete
                     fullWidth
                     value={selectedGuest}
-                    options={guest}
+                    options={guestData}
                     getOptionLabel={(option) => option.ig}
                     onChange={handleSelectGuest}
                     renderInput={(params) => (

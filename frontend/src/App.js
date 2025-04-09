@@ -1,5 +1,20 @@
 import { BrowserRouter as Router } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setEventId,
+  setGuestData,
+  setGuestOptions,
+  setSelectedValues,
+  setSeats,
+  setSeatNo,
+  setGuestNo,
+  setEventName,
+  setEventHouse,
+  setEventList,
+  setAssignedSeats,
+  setIsPopupVisible,
+} from "./redux/feature/eventSlice";
 import {
   getSeatByEventIdApi,
   getEventDataApi,
@@ -21,102 +36,119 @@ import SeatingPlanTab from "./component/pages/SeatingPlanTab";
 import UploadPage from "./component/pages/UploadEvent";
 
 function App() {
-  const [eventId, setEventId] = useState("");
-  const [guestData, setGuestData] = useState([]);
-  const [guestOptions, setGuestOptions] = useState([]); // [ { id: 1, ig: "name", tel: "123", guest_num: 1, checked: false }
-  const [selectedValues, setSelectedValues] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
-  const [seat, setSeat] = useState(null);
-  const [seatNo, setSeatNo] = useState(0);
-  const [guestNo, setGuestNo] = useState(0);
-  const [eventName, setEventName] = useState(null);
-  const [eventHouse, setEventHouse] = useState(null); // [ { house_id: 1, house_name: "house1" }
-  const [event, setEvent] = useState([]);
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [assignedSeats, setAssignedSeats] = useState([]);
+  const dispatch = useDispatch();
 
-  let seatingPlan = {};
+  const {
+    eventId,
+    guestData,
+    guestOptions,
+    selectedValues,
+    seats,
+    seatNo,
+    guestNo,
+    eventList,
+    assignedSeats,
+  } = useSelector((state) => state.event);
+
+  const seatRef = useRef(seats);
+  const assignedSeatsRef = useRef(assignedSeats);
 
   const getEventData = async (event) => {
     event.preventDefault();
     getEventDataApi(eventId).then((response) => {
       if (response) {
-        setGuestData(JSON.parse(response));
+        dispatch(setGuestData(JSON.parse(response)));
         getSeatByEventId();
       }
     });
   };
   useEffect(() => {
-    if (seat) {
-      let totalAvailableSeats = 0; // Accumulator for available seats
-      const updatedSeats = seat.map((house) => {
-        const updatedHouse = { ...house }; // Create a shallow copy to avoid direct mutation
+    assignedSeatsRef.current = assignedSeats;
+  }, [assignedSeats]);
+
+  useEffect(() => {
+    if (seats) {
+      let totalAvailableSeats = 0;
+      const updatedSeats = seats.map((house) => {
+        const updatedHouse = { ...house };
         updatedHouse.seatInfo = house.seatInfo.map((row) => {
-          let availableSeatCount = 0; // Counter for available seats in the current row
-          const updatedRow = { ...row, column: [...row.column] }; // Shallow copy of row and column
+          let availableSeatCount = 0;
+          const updatedRow = { ...row, column: [...row.column] };
           updatedRow.column.forEach((seatTemp) => {
-            if (isSeatAvailable(seatTemp)) {
+            if (!seatTemp.reserved && !seatTemp.disabled && !seatTemp.marked) {
               availableSeatCount++;
             }
           });
-          updatedRow.availableSeat = availableSeatCount; // Update availableSeat for the row
-          totalAvailableSeats += availableSeatCount; // Add to total available seats
+          updatedRow.availableSeat = availableSeatCount;
+          totalAvailableSeats += availableSeatCount;
           return updatedRow;
         });
         return updatedHouse;
       });
-      setSeatNo(totalAvailableSeats); // Update state once with the total count
-      // If you need to update the seat state with the modified structure, do it here
+      dispatch(setSeatNo(totalAvailableSeats));
     }
-  }, [seat]);
+  }, [seats, dispatch]);
 
   useEffect(() => {
     getAllEventApi().then((response) => {
-      setEvent(response.results);
+      dispatch(setEventList(response.results));
     });
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     const remainingGuests = guestData.filter((guest) => !guest.checked);
-    console.log("updated guest data", remainingGuests);
-    setGuestOptions(remainingGuests);
-  }, [guestData]);
+    dispatch(setGuestOptions(remainingGuests));
+  }, [guestData, dispatch]);
 
   useEffect(() => {
-    setGuestNo(guestOptions.length);
-  }, [guestOptions]);
+    dispatch(setGuestNo(guestOptions.length));
+  }, [guestOptions, dispatch]);
 
   const calculateAvailableSeats = (seatingPlan) => {
-    seatingPlan.forEach((house) => {
-      house.seatInfo.forEach((row) => {
+    const updatedSeatingPlan = seatingPlan.map((house) => {
+      const updatedHouse = { ...house };
+      updatedHouse.seatInfo = house.seatInfo.map((row) => {
         let availableSeatCount = 0;
-        row.column.forEach((seat) => {
+        const updatedRow = { ...row, column: [...row.column] };
+        updatedRow.column.forEach((seat) => {
           if (isSeatAvailable(seat)) {
             availableSeatCount++;
           }
         });
-        row.availableSeat = availableSeatCount;
+        updatedRow.availableSeat = availableSeatCount;
+        return updatedRow;
       });
+      return updatedHouse;
     });
-    return seatingPlan;
+
+    const totalAvailableSeats = updatedSeatingPlan.reduce((acc, house) => {
+      return (
+        acc +
+        house.seatInfo.reduce((rowAcc, row) => rowAcc + row.availableSeat, 0)
+      );
+    }, 0);
+
+    dispatch(setSeats(updatedSeatingPlan));
+    dispatch(setSeatNo(totalAvailableSeats));
   };
 
   const getSeatByEventId = () => {
     getSeatByEventIdApi(eventId).then((response) => {
       if (response) {
-        setEventName(response.event_name);
-        setEventHouse(response.display_name);
-        if (response.seating_plan == null) {
+        dispatch(setEventName(response.event_name));
+        dispatch(setEventHouse(response.display_name));
+
+        let seatingPlan = response.seating_plan
+          ? JSON.parse(response.seating_plan)
+          : [];
+        if (!response.seating_plan) {
           const request = {
             seatingPlan: seatingPlan,
             guestData: guestData,
           };
           updateEventApi(eventId, request);
-        } else {
-          seatingPlan = JSON.parse(response.seating_plan);
         }
-        console.log(calculateAvailableSeats(seatingPlan));
-        setSeat(calculateAvailableSeats(seatingPlan));
+        calculateAvailableSeats(seatingPlan);
       }
     });
   };
@@ -126,10 +158,12 @@ function App() {
       (acc, guest) => acc + parseInt(guest.guest_num, 10),
       0
     );
-    setAssignedSeats([]);
-    let seatingPlan = assignSeats(seat, selectedValues, totalGuestNum);
 
-    setIsPopupVisible(true); // Show the popup
+    dispatch(setAssignedSeats([]));
+    assignedSeatsRef.current = [];
+    assignSeats(seats, selectedValues, totalGuestNum);
+
+    dispatch(setIsPopupVisible(true)); // Show the popup
 
     const updatedGuestData = guestData.map((guest) => {
       const isSelected = selectedValues.some(
@@ -138,11 +172,11 @@ function App() {
       return isSelected ? { ...guest, checked: true, guest_num: "0" } : guest;
     });
 
-    setGuestData(updatedGuestData);
-    setSelectedValues([]);
+    dispatch(setGuestData(updatedGuestData));
+    dispatch(setSelectedValues([]));
 
     const request = {
-      seatingPlan: seatingPlan,
+      seatingPlan: seatRef.current,
       guestData: updatedGuestData,
     };
     updateEventApi(eventId, request);
@@ -160,6 +194,7 @@ function App() {
       index: 0,
       bestRateScore: 4,
     };
+
     seatingPlan.forEach((plan, index) => {
       let bestSeat = null;
       const houseRow = plan.seatInfo;
@@ -203,7 +238,6 @@ function App() {
         selectedHouseName
       );
     }
-    return seatingPlan;
   };
 
   const findSeatsAndCalculateScore = (
@@ -294,15 +328,47 @@ function App() {
     }
   };
 
-  const markSeat = (seat, displayValue, extra,row, house) => {
-    seat.marked = true;
-    seat.display = displayValue;
+  const markSeat = (seat, displayValue, extra, row, house) => {
     const seatNo = `${row}${seat.column}`;
-    setAssignedSeats((prev) => [...prev, { seatNo, house, extra }]);
+    const updatedAssignedSeats = [...assignedSeatsRef.current, { seatNo, house, extra }]; // Use the current state to create a new array
+    dispatch(setAssignedSeats(updatedAssignedSeats)); // Dispatch the updated array
+
+    const updatedSeats = seats.map((houseItem) => {
+      // Check if the house matches
+      if (houseItem.houseDisplay === house) {
+        return {
+          ...houseItem,
+          seatInfo: houseItem.seatInfo.map((rowItem) => {
+            // Check if the row matches
+            if (rowItem.row === row) {
+              return {
+                ...rowItem,
+                column: rowItem.column.map((colItem) => {
+                  // Check if the seat matches
+                  if (colItem.column === seat.column) {
+                    return {
+                      ...colItem,
+                      marked: true,
+                      display: displayValue,
+                    };
+                  }
+                  return colItem; // Return other seats unchanged
+                }),
+              };
+            }
+            return rowItem; // Return other rows unchanged
+          }),
+        };
+      }
+      return houseItem; // Return other houses unchanged
+    });
+
+    dispatch(setSeats(updatedSeats));
+    seatRef.current = updatedSeats;
   };
 
   const handleSelectionChange = (event, newValue) => {
-    setSelectedValues(newValue);
+    dispatch(setSelectedValues(newValue));
   };
 
   return (
@@ -328,14 +394,18 @@ function App() {
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  {event && event.length > 0 ? (
+                  {eventList && eventList.length > 0 ? (
                     <Autocomplete
                       fullWidth
-                      options={event}
+                      options={eventList}
                       getOptionLabel={(option) => option.event_name}
-                      value={event.find((item) => item.event_id === eventId)}
+                      value={eventList.find(
+                        (item) => item.event_id === eventId
+                      )}
                       onChange={(event, newValue) => {
-                        setEventId(newValue.event_id);
+                        if (newValue) {
+                          dispatch(setEventId(newValue.event_id));
+                        }
                       }}
                       renderInput={(params) => (
                         <TextField
@@ -415,11 +485,7 @@ function App() {
               >
                 Assign seat
               </Button>
-              <SeatAssignmentPopup
-                seats={assignedSeats}
-                open={isPopupVisible}
-                onClose={() => setIsPopupVisible(false)}
-              />
+              <SeatAssignmentPopup />
             </Grid>
           </Grid>
           <Grid
@@ -455,14 +521,7 @@ function App() {
         </Grid>
 
         <Grid item xs={12}>
-          <SeatingPlanTab
-            seatingData={seat}
-            eventId={eventId}
-            eventName={eventName}
-            eventHouse={eventHouse}
-            guest={guestData}
-            setSeat={setSeat}
-          />
+          <SeatingPlanTab />
         </Grid>
 
         <Grid item xs={12}>

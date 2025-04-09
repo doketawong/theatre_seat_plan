@@ -1,4 +1,3 @@
-import React from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -8,19 +7,28 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import { Typography } from "@mui/material";
+import { useSelector, useDispatch } from "react-redux";
+import { setIsPopupVisible } from "../../redux/feature/eventSlice"; // Adjust the import path as necessary
 
-const SeatAssignmentPopup = ({ seats, onClose, open }) => {
-  console.log(seats);
+const SeatAssignmentPopup = () => {
+  const dispatch = useDispatch();
+
+  const { assignedSeats, isPopupVisible } = useSelector((state) => state.event);
+
+  const onClose = () => {
+    dispatch(setIsPopupVisible(false));
+  };
+
   return (
     <Dialog
-      open={open}
+      open={isPopupVisible}
       onClose={onClose}
       aria-labelledby="seat-assignment-title"
     >
       <DialogTitle id="seat-assignment-title">Seat Assignment</DialogTitle>
       <DialogContent>
         <List>
-          {seats.map((seat, index) => (
+          {assignedSeats.map((seat, index) => (
             <ListItem key={index}>
               <ListItemText
                 primary={
