@@ -62,9 +62,6 @@ function App() {
       }
     });
   };
-  useEffect(() => {
-    assignedSeatsRef.current = assignedSeats;
-  }, [assignedSeats]);
 
   useEffect(() => {
     if (seats) {
@@ -161,6 +158,7 @@ function App() {
 
     dispatch(setAssignedSeats([]));
     assignedSeatsRef.current = [];
+    seatRef.current = seats;
     assignSeats(seats, selectedValues, totalGuestNum);
 
     dispatch(setIsPopupVisible(true)); // Show the popup
@@ -331,9 +329,11 @@ function App() {
   const markSeat = (seat, displayValue, extra, row, house) => {
     const seatNo = `${row}${seat.column}`;
     const updatedAssignedSeats = [...assignedSeatsRef.current, { seatNo, house, extra }]; // Use the current state to create a new array
-    dispatch(setAssignedSeats(updatedAssignedSeats)); // Dispatch the updated array
+    assignedSeatsRef.current = updatedAssignedSeats; // Update the ref to the new array
+    dispatch(setAssignedSeats(updatedAssignedSeats));
 
-    const updatedSeats = seats.map((houseItem) => {
+    console.log(seatRef.current);
+    const updatedSeats = seatRef.current.map((houseItem) => {
       // Check if the house matches
       if (houseItem.houseDisplay === house) {
         return {
@@ -459,12 +459,12 @@ function App() {
                 fullWidth
                 getOptionLabel={(option) => {
                   return (
-                    "tel: " +
+                    "Tel: " +
                     option.tel +
                     "; IG: " +
                     option.ig +
-                    "; email: " +
-                    option.email
+                    "; No of people: " +
+                    option.guest_num
                   );
                 }} // Adjust according to your data structure
                 renderInput={(params) => (
