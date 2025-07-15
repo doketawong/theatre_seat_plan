@@ -21,7 +21,15 @@ function UploadPage() {
 
   useEffect(() => {
     getAllHouseApi().then((data) => {
-      setHouses(data.results);
+      if (data && data.results) {
+        setHouses(data.results);
+      } else {
+        console.warn('No house data received or invalid format');
+        setHouses([]);
+      }
+    }).catch((error) => {
+      console.error('Error fetching houses:', error);
+      setHouses([]);
     });
   }, []);
 
@@ -37,25 +45,33 @@ function UploadPage() {
     Object.keys(form).forEach((key) => formData.append(key, form[key]));
 
     getHouseByIdApi(form.houseIds).then((data) => {
-      const seatsArray = data.results.map((val) => {
-        const seatInfo = JSON.parse(val.seat.replace(/\n/g, "").trim());
-        
-        const houseDisplay  = val.display_name;
-        return {seatInfo, houseDisplay};
-      });
+      if (data && data.results && Array.isArray(data.results)) {
+        const seatsArray = data.results.map((val) => {
+          const seatInfo = JSON.parse(val.seat.replace(/\n/g, "").trim());
+          
+          const houseDisplay  = val.display_name;
+          return {seatInfo, houseDisplay};
+        });
 
-      seatsArray.forEach((item) => {
-        const { seatInfo, houseDisplay } = item;
-seatInfo.forEach((row, rowIndex) => {
-  // Assuming an updated condition to check for available seats that are not marked, disabled, or reserved
-  // This is a placeholder condition; the actual implementation may vary based on how such seats are represented
-  const availableSeats = row.column.filter(seat =>  !seat.marked && !seat.disabled && !seat.reserved).length;
-  console.log(`House: ${houseDisplay}, Row: ${rowIndex + 1}, Available Seats: ${availableSeats}`);
-});
-      });
+        seatsArray.forEach((item) => {
+          const { seatInfo, houseDisplay } = item;
+          seatInfo.forEach((row, rowIndex) => {
+            // Assuming an updated condition to check for available seats that are not marked, disabled, or reserved
+            // This is a placeholder condition; the actual implementation may vary based on how such seats are represented
+            const availableSeats = row.column.filter(seat =>  !seat.marked && !seat.disabled && !seat.reserved).length;
+            console.log(`House: ${houseDisplay}, Row: ${rowIndex + 1}, Available Seats: ${availableSeats}`);
+          });
+        });
 
-      formData.append("seat", JSON.stringify(seatsArray));
-      uploadEventApi(formData);
+        formData.append("seat", JSON.stringify(seatsArray));
+        uploadEventApi(formData);
+      } else {
+        console.error('No house data received or invalid format');
+        alert('Error: Could not retrieve house data');
+      }
+    }).catch((error) => {
+      console.error('Error fetching house data:', error);
+      alert('Error: Failed to fetch house data');
     });
   };
 
