@@ -298,8 +298,8 @@ app.post("/generate2DArray", (req, res) => {
     row: String.fromCharCode(65 + (numRows - 1 - rowIndex)),
     availableSeat: numCols,
     column: Array.from({ length: numCols }, (_, colIndex) => ({
-      id: colIndex + 1,
-      column: colIndex + 1,
+      id: numCols - colIndex, // Start from largest number and go down
+      column: numCols - colIndex, // Column numbers from largest to smallest
       display: "",
       marked: false,
       reserved: false,
