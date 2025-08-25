@@ -21,7 +21,8 @@ import {
   EventSeat,
   Event,
   Assignment,
-  Dashboard
+  Dashboard,
+  Email
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -37,7 +38,8 @@ const Layout = ({ children }) => {
     { text: 'Seating Plan', icon: <EventSeat />, path: '/seating-plan' },
     { text: 'Event Creation', icon: <Event />, path: '/event-create' },
     { text: 'Seat Assignment', icon: <Assignment />, path: '/seat-assign' },
-    { text: 'Generate 2D Array', icon: <Dashboard />, path: '/generate-2d-array' }
+    { text: 'Generate 2D Array', icon: <Dashboard />, path: '/generate-2d-array' },
+    { text: 'Mail Merge', icon: <Email />, path: '/mail-merge' }
   ];
 
   const handleDrawerToggle = () => {

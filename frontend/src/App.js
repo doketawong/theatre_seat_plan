@@ -12,6 +12,7 @@ import SeatingPlanPage from "./components/pages/SeatingPlanPage";
 import EventCreatePage from "./components/pages/EventCreatePage";
 import SeatAssign from "./components/pages/SeatAssign";
 import Generate2DArrayPage from "./components/pages/Generate2DArrayPage";
+import MailMergePage from "./components/pages/MailMergePage";
 
 import "./App.css";
 
@@ -39,6 +40,7 @@ function App() {
               <Route path="/event-create" element={<EventCreatePage />} />
               <Route path="/seat-assign" element={<SeatAssign />} />
               <Route path="/generate-2d-array" element={<Generate2DArrayPage />} />
+              <Route path="/mail-merge" element={<MailMergePage />} />
             </Routes>
           </Layout>
         </Router>
