@@ -28,6 +28,9 @@ const Generate2DArrayPage = () => {
   const [selectedSeat, setSelectedSeat] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [previewMode, setPreviewMode] = useState('grid'); // 'grid' or 'theatre'
+  const [importedData, setImportedData] = useState(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importDataText, setImportDataText] = useState('');
   
   // For bulk operations
   const [multiSelectMode, setMultiSelectMode] = useState(false);
@@ -52,13 +55,259 @@ const Generate2DArrayPage = () => {
           marked: false,
           reserved: false,
           disabled: false,
-          rate: 3 // Default rating
+          rate: 5 // Default rating to 5 to match your data
         });
       }
       array.push(rowData);
     }
     setGeneratedArray(array);
     setSelectedSeats(new Set());
+  };
+
+  const importData = () => {
+    try {
+      const parsedData = JSON.parse(importDataText);
+      
+      // Validate the data structure
+      if (Array.isArray(parsedData) && parsedData.length > 0) {
+        const firstRow = parsedData[0];
+        if (firstRow.row && firstRow.column && Array.isArray(firstRow.column)) {
+          setGeneratedArray(parsedData);
+          setRows(parsedData.length);
+          setColumns(parsedData[0].column.length);
+          setShowImportDialog(false);
+          setImportDataText('');
+          setSelectedSeats(new Set());
+          setShowSuccess(true);
+        } else {
+          alert('Invalid data format. Please check the structure.');
+        }
+      } else {
+        alert('Invalid data format. Expected an array of rows.');
+      }
+    } catch (error) {
+      alert('Invalid JSON format. Please check your data.');
+    }
+  };
+
+  const loadSampleData = () => {
+    const sampleData = [
+      {
+        "row": "K",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "J",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "I",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "H",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "G",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "F",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "E",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "D",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "C",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "B",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      },
+      {
+        "row": "A",
+        "availableSeat": 13,
+        "column": [
+          {"id": 1, "column": 1, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 2, "column": 2, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 3, "column": 3, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 4, "column": 4, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 5, "column": 5, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 6, "column": 6, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 7, "column": 7, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 8, "column": 8, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 9, "column": 9, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 10, "column": 10, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 11, "column": 11, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 12, "column": 12, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5},
+          {"id": 13, "column": 13, "display": "", "marked": false, "reserved": false, "disabled": false, "rate": 5}
+        ]
+      }
+    ];
+    
+    setGeneratedArray(sampleData);
+    setRows(sampleData.length);
+    setColumns(sampleData[0].column.length);
+    setSelectedSeats(new Set());
+    setShowSuccess(true);
   };
 
   const handleSeatClick = (rowIndex, colIndex, seat) => {
@@ -87,6 +336,17 @@ const Generate2DArrayPage = () => {
     ).length;
     newArray[rowIndex].availableSeat = availableCount;
     
+    setGeneratedArray(newArray);
+  };
+
+  const bulkUpdateSeats = (updates) => {
+    const newArray = [...generatedArray];
+    updates.forEach(({ rowIndex, colIndex, updatedSeat }) => {
+      newArray[rowIndex].column[colIndex] = { ...updatedSeat };
+    });
+    
+    // Recalculate available seats for all affected rows
+    recalculateAvailableSeats(newArray);
     setGeneratedArray(newArray);
   };
 
@@ -237,6 +497,25 @@ const Generate2DArrayPage = () => {
               sx={{ mb: 2 }}
             >
               Generate Layout
+            </Button>
+
+            <Button
+              variant="outlined"
+              onClick={() => setShowImportDialog(true)}
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              Import Seating Data
+            </Button>
+
+            <Button
+              variant="outlined"
+              onClick={loadSampleData}
+              fullWidth
+              sx={{ mb: 2 }}
+              color="secondary"
+            >
+              Load Sample Data (11×13)
             </Button>
 
             {generatedArray && (
@@ -393,9 +672,24 @@ const Generate2DArrayPage = () => {
               </Typography>
               
               {generatedArray && (
-                <Box display="flex" gap={1}>
+                <Box display="flex" gap={1} flexWrap="wrap">
                   <Chip label={`${rows} × ${columns}`} size="small" />
                   <Chip label={`${rows * columns} total seats`} size="small" />
+                  <Chip 
+                    label={`${generatedArray.reduce((sum, row) => sum + row.availableSeat, 0)} available`} 
+                    size="small" 
+                    color="success"
+                  />
+                  <Chip 
+                    label={`${generatedArray.reduce((sum, row) => sum + row.column.filter(s => s.reserved).length, 0)} reserved`} 
+                    size="small" 
+                    color="warning"
+                  />
+                  <Chip 
+                    label={`${generatedArray.reduce((sum, row) => sum + row.column.filter(s => s.disabled).length, 0)} disabled`} 
+                    size="small" 
+                    color="error"
+                  />
                 </Box>
               )}
             </Box>
@@ -424,14 +718,35 @@ const Generate2DArrayPage = () => {
 
                 <Box 
                   sx={{ 
-                    maxHeight: 500, 
+                    maxHeight: 600, 
                     overflow: 'auto',
                     border: '1px solid #e0e0e0',
                     borderRadius: 1,
                     p: 2,
-                    bgcolor: previewMode === 'theatre' ? '#000' : '#fafafa'
+                    bgcolor: previewMode === 'theatre' ? '#1a1a1a' : '#fafafa'
                   }}
                 >
+                  {/* Theatre mode header */}
+                  {previewMode === 'theatre' && (
+                    <Box mb={3} display="flex" justifyContent="center">
+                      <Paper
+                        elevation={3}
+                        sx={{
+                          p: 2,
+                          bgcolor: 'linear-gradient(45deg, #424242 30%, #616161 90%)',
+                          background: 'linear-gradient(45deg, #424242 30%, #616161 90%)',
+                          color: 'white',
+                          borderRadius: 2,
+                          boxShadow: '0 3px 5px 2px rgba(66, 66, 66, .3)',
+                          minWidth: '60%',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <Typography variant="h5" fontWeight="bold">SCREEN</Typography>
+                      </Paper>
+                    </Box>
+                  )}
+
                   {generatedArray.slice().reverse().map((row, reverseIndex) => {
                     const rowIndex = generatedArray.length - 1 - reverseIndex;
                     
@@ -439,20 +754,21 @@ const Generate2DArrayPage = () => {
                       <Box key={rowIndex}>
                         <Box sx={{ 
                           display: 'flex', 
-                          gap: 0.5, 
+                          gap: previewMode === 'theatre' ? 1 : 0.5, 
                           mb: 1,
                           alignItems: 'center',
                           justifyContent: previewMode === 'theatre' ? 'center' : 'flex-start'
                         }}>
                         {previewMode === 'theatre' && (
                           <Typography 
-                            variant="body2" 
+                            variant="h6" 
                             sx={{ 
-                              minWidth: 30, 
+                              minWidth: 40, 
                               textAlign: 'right', 
-                              mr: 1,
-                              color: 'white',
-                              fontWeight: 'bold'
+                              mr: 2,
+                              color: '#ffffff',
+                              fontWeight: 'bold',
+                              fontFamily: 'monospace'
                             }}
                           >
                             {row.row}
@@ -464,42 +780,90 @@ const Generate2DArrayPage = () => {
                           const isSelected = selectedSeats.has(seatKey);
                           
                           return (
-                            <Tooltip key={colIndex} title={getSeatTooltip(seat, row.row)}>
+                            <Tooltip 
+                              key={colIndex} 
+                              title={
+                                <Box>
+                                  <Typography variant="body2" fontWeight="bold">
+                                    {getSeatTooltip(seat, row.row)}
+                                  </Typography>
+                                  {seat.display && (
+                                    <Typography variant="caption">
+                                      Display: {seat.display}
+                                    </Typography>
+                                  )}
+                                </Box>
+                              }
+                              arrow
+                            >
                               <Box
                                 onClick={() => handleSeatClick(rowIndex, colIndex, seat)}
                                 sx={{
-                                  width: previewMode === 'theatre' ? 40 : 24,
-                                  height: previewMode === 'theatre' ? 40 : 24,
+                                  width: previewMode === 'theatre' ? 45 : 28,
+                                  height: previewMode === 'theatre' ? 45 : 28,
                                   bgcolor: isSelected ? '#9c27b0' : getSeatColor(seat),
                                   display: 'flex',
+                                  flexDirection: 'column',
                                   alignItems: 'center',
                                   justifyContent: 'center',
                                   fontSize: previewMode === 'theatre' ? '10px' : '8px',
                                   color: 'white',
-                                  borderRadius: 0.5,
+                                  borderRadius: previewMode === 'theatre' ? 1 : 0.5,
                                   cursor: 'pointer',
                                   border: isSelected ? '2px solid #9c27b0' : 'none',
                                   opacity: seat.disabled ? 0.3 : 1,
+                                  position: 'relative',
                                   '&:hover': {
                                     opacity: 0.8,
-                                    transform: 'scale(1.1)'
+                                    transform: 'scale(1.05)',
+                                    zIndex: 1,
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
                                   },
-                                  transition: 'all 0.2s'
+                                  transition: 'all 0.2s ease',
+                                  boxShadow: previewMode === 'theatre' ? '0 1px 3px rgba(0,0,0,0.3)' : 'none'
                                 }}
                               >
                                 {previewMode === 'theatre' ? (
                                   <Box sx={{ textAlign: 'center' }}>
-                                    <Typography variant="caption" sx={{ fontSize: '8px', lineHeight: 1 }}>
+                                    <Typography variant="caption" sx={{ fontSize: '9px', lineHeight: 1, fontWeight: 'bold' }}>
                                       {row.row}{seat.column}
                                     </Typography>
-                                    {seat.rate && (
-                                      <Typography variant="caption" sx={{ fontSize: '6px', lineHeight: 1 }}>
-                                        ★{seat.rate}
-                                      </Typography>
-                                    )}
+                                    <Typography variant="caption" sx={{ fontSize: '7px', lineHeight: 1, color: '#ffeb3b' }}>
+                                      ★{seat.rate}
+                                    </Typography>
                                   </Box>
                                 ) : (
                                   `${row.row}${seat.column}`
+                                )}
+                                
+                                {/* Status indicators */}
+                                {seat.reserved && (
+                                  <Box
+                                    sx={{
+                                      position: 'absolute',
+                                      top: -2,
+                                      right: -2,
+                                      width: 8,
+                                      height: 8,
+                                      bgcolor: '#ff5722',
+                                      borderRadius: '50%',
+                                      border: '1px solid white'
+                                    }}
+                                  />
+                                )}
+                                {seat.marked && (
+                                  <Box
+                                    sx={{
+                                      position: 'absolute',
+                                      top: -2,
+                                      left: -2,
+                                      width: 8,
+                                      height: 8,
+                                      bgcolor: '#4caf50',
+                                      borderRadius: '50%',
+                                      border: '1px solid white'
+                                    }}
+                                  />
                                 )}
                               </Box>
                             </Tooltip>
@@ -511,31 +875,15 @@ const Generate2DArrayPage = () => {
                             variant="caption" 
                             sx={{ 
                               ml: 2, 
-                              color: 'white',
-                              minWidth: 60
+                              color: '#bdbdbd',
+                              minWidth: 80,
+                              fontSize: '11px'
                             }}
                           >
-                            {row.availableSeat} avail
+                            {row.availableSeat}/{row.column.length} available
                           </Typography>
                         )}
                         </Box>
-                        
-                        {/* Screen positioning - show after row A */}
-                        {previewMode === 'theatre' && row.row === 'A' && (
-                          <Box mt={2} display="flex" justifyContent="center">
-                            <Paper
-                              elevation={1}
-                              sx={{
-                                p: 1,
-                                bgcolor: '#424242',
-                                color: 'white',
-                                borderRadius: 1
-                              }}
-                            >
-                              <Typography variant="h6">SCREEN</Typography>
-                            </Paper>
-                          </Box>
-                        )}
                       </Box>
                     );
                   })}
@@ -558,71 +906,95 @@ const Generate2DArrayPage = () => {
       {/* Seat Edit Dialog */}
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          Edit Seat {selectedSeat && generatedArray && 
-            `${generatedArray[selectedSeat.rowIndex]?.row}${selectedSeat.seat?.column}`}
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Typography variant="h6">
+              Edit Seat {selectedSeat && generatedArray && 
+                `${generatedArray[selectedSeat.rowIndex]?.row}${selectedSeat.seat?.column}`}
+            </Typography>
+            {selectedSeat && (
+              <Chip 
+                label={`Rate: ${selectedSeat.seat.rate}★`} 
+                size="small" 
+                color="primary"
+              />
+            )}
+          </Box>
         </DialogTitle>
         <DialogContent>
           {selectedSeat && (
             <Box sx={{ pt: 2 }}>
-              <Grid container spacing={2}>
+              <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedSeat.seat.disabled}
-                        onChange={(e) => {
-                          const newSeat = { ...selectedSeat.seat, disabled: e.target.checked };
-                          if (e.target.checked) {
-                            newSeat.marked = false;
-                            newSeat.reserved = false;
-                          }
-                          setSelectedSeat({ ...selectedSeat, seat: newSeat });
-                        }}
+                  <Typography variant="subtitle2" gutterBottom>
+                    Seat Status
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedSeat.seat.disabled}
+                            onChange={(e) => {
+                              const newSeat = { ...selectedSeat.seat, disabled: e.target.checked };
+                              if (e.target.checked) {
+                                newSeat.marked = false;
+                                newSeat.reserved = false;
+                                newSeat.display = "";
+                              }
+                              setSelectedSeat({ ...selectedSeat, seat: newSeat });
+                            }}
+                          />
+                        }
+                        label="Disabled"
                       />
-                    }
-                    label="Disabled"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedSeat.seat.reserved}
-                        onChange={(e) => {
-                          const newSeat = { ...selectedSeat.seat, reserved: e.target.checked };
-                          if (e.target.checked) {
-                            newSeat.marked = false;
-                            newSeat.disabled = false;
-                          }
-                          setSelectedSeat({ ...selectedSeat, seat: newSeat });
-                        }}
-                        disabled={selectedSeat.seat.disabled}
+                    </Grid>
+                    <Grid item xs={4}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedSeat.seat.reserved}
+                            onChange={(e) => {
+                              const newSeat = { ...selectedSeat.seat, reserved: e.target.checked };
+                              if (e.target.checked) {
+                                newSeat.marked = false;
+                                newSeat.disabled = false;
+                              } else {
+                                newSeat.display = "";
+                              }
+                              setSelectedSeat({ ...selectedSeat, seat: newSeat });
+                            }}
+                            disabled={selectedSeat.seat.disabled}
+                          />
+                        }
+                        label="Reserved"
                       />
-                    }
-                    label="Reserved"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedSeat.seat.marked}
-                        onChange={(e) => {
-                          const newSeat = { ...selectedSeat.seat, marked: e.target.checked };
-                          if (e.target.checked) {
-                            newSeat.reserved = false;
-                            newSeat.disabled = false;
-                          }
-                          setSelectedSeat({ ...selectedSeat, seat: newSeat });
-                        }}
-                        disabled={selectedSeat.seat.disabled}
+                    </Grid>
+                    <Grid item xs={4}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedSeat.seat.marked}
+                            onChange={(e) => {
+                              const newSeat = { ...selectedSeat.seat, marked: e.target.checked };
+                              if (e.target.checked) {
+                                newSeat.reserved = false;
+                                newSeat.disabled = false;
+                              }
+                              setSelectedSeat({ ...selectedSeat, seat: newSeat });
+                            }}
+                            disabled={selectedSeat.seat.disabled}
+                          />
+                        }
+                        label="Marked"
                       />
-                    }
-                    label="Marked"
-                  />
+                    </Grid>
+                  </Grid>
                 </Grid>
+                
                 <Grid item xs={12}>
-                  <Typography gutterBottom>Rating: {selectedSeat.seat.rate}</Typography>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Seat Rating: {selectedSeat.seat.rate} ★
+                  </Typography>
                   <Slider
                     value={selectedSeat.seat.rate}
                     onChange={(_, newValue) => {
@@ -633,15 +1005,22 @@ const Generate2DArrayPage = () => {
                     }}
                     min={1}
                     max={5}
-                    marks
+                    marks={[
+                      { value: 1, label: '1★' },
+                      { value: 2, label: '2★' },
+                      { value: 3, label: '3★' },
+                      { value: 4, label: '4★' },
+                      { value: 5, label: '5★' },
+                    ]}
                     step={1}
                     valueLabelDisplay="auto"
                   />
                 </Grid>
+                
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Display Text"
+                    label="Display Text / Guest Name"
                     value={selectedSeat.seat.display}
                     onChange={(e) => {
                       setSelectedSeat({ 
@@ -649,8 +1028,44 @@ const Generate2DArrayPage = () => {
                         seat: { ...selectedSeat.seat, display: e.target.value } 
                       });
                     }}
-                    placeholder="Guest name or identifier"
+                    placeholder="Enter guest name or identifier"
+                    disabled={selectedSeat.seat.disabled}
+                    helperText={
+                      selectedSeat.seat.reserved 
+                        ? "Enter the name of the person this seat is reserved for"
+                        : selectedSeat.seat.disabled
+                        ? "Disabled seats cannot have display text"
+                        : "Optional display text for this seat"
+                    }
                   />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Seat Preview
+                  </Typography>
+                  <Box 
+                    sx={{ 
+                      width: 60, 
+                      height: 60, 
+                      bgcolor: getSeatColor(selectedSeat.seat),
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 1,
+                      color: 'white',
+                      opacity: selectedSeat.seat.disabled ? 0.3 : 1,
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+                      {generatedArray[selectedSeat.rowIndex]?.row}{selectedSeat.seat?.column}
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: '8px', color: '#ffeb3b' }}>
+                      ★{selectedSeat.seat.rate}
+                    </Typography>
+                  </Box>
                 </Grid>
               </Grid>
             </Box>
@@ -684,6 +1099,62 @@ const Generate2DArrayPage = () => {
           Seating plan exported successfully!
         </Alert>
       </Snackbar>
+
+      {/* Import Data Dialog */}
+      <Dialog open={showImportDialog} onClose={() => setShowImportDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          Import Seating Plan Data
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+            Paste your seating plan JSON data below. The data should be an array of rows with the following structure:
+          </Typography>
+          <Box sx={{ mb: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+            <Typography variant="caption" component="pre" sx={{ fontSize: '11px' }}>
+{`[
+  {
+    "row": "A",
+    "availableSeat": 13,
+    "column": [
+      {
+        "id": 1,
+        "column": 1,
+        "display": "",
+        "marked": false,
+        "reserved": false,
+        "disabled": false,
+        "rate": 5
+      }
+      // ... more seats
+    ]
+  }
+  // ... more rows
+]`}
+            </Typography>
+          </Box>
+          <TextField
+            fullWidth
+            multiline
+            rows={12}
+            value={importDataText}
+            onChange={(e) => setImportDataText(e.target.value)}
+            placeholder="Paste your JSON data here..."
+            variant="outlined"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowImportDialog(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="contained"
+            onClick={importData}
+            disabled={!importDataText.trim()}
+          >
+            Import Data
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

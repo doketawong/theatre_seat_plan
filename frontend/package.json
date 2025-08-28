@@ -13,9 +13,14 @@
     "@testing-library/user-event": "^13.5.0",
     "frontend": "file:",
     "fs": "^0.0.1-security",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "papaparse": "^5.4.1",
+    "qrcode": "^1.5.4",
+    "quill": "^2.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-quill": "^2.0.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.22.2",
     "react-scripts": "^5.0.1",
@@ -46,6 +51,7 @@
     ]
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.5",
     "typescript": "^4.0.0"
   }
 }
